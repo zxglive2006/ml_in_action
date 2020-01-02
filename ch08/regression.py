@@ -3,18 +3,20 @@ Created on Jan 8, 2011
 @author: Peter
 """
 from numpy import *
+from common.util import load_data_set
 
 
-def standRegres(xArr, yArr):
-    xMat = mat(xArr); yMat = mat(yArr).T
-    xTx = xMat.T*xMat
-    if linalg.det(xTx) == 0.0:
+def stand_regress(x_arr, y_arr):
+    x_mat = mat(x_arr)
+    y_mat = mat(y_arr).T
+    x_tx = x_mat.T * x_mat
+    if linalg.det(x_tx) == 0.0:
         print("This matrix is singular, cannot do inverse")
         return
-    ws = xTx.I * (xMat.T*yMat)
-    return ws
+    return x_tx.I * (x_mat.T * y_mat)
 
-def lwlr(testPoint,xArr,yArr,k=1.0):
+
+def lwlr(testPoint, xArr, yArr, k=1.0):
     xMat = mat(xArr); yMat = mat(yArr).T
     m = shape(xMat)[0]
     weights = mat(eye((m)))
@@ -28,12 +30,15 @@ def lwlr(testPoint,xArr,yArr,k=1.0):
     ws = xTx.I * (xMat.T * (weights * yMat))
     return testPoint * ws
 
-def lwlrTest(testArr,xArr,yArr,k=1.0):  #loops over all the data points and applies lwlr to each one
+
+def lwlrTest(testArr,xArr,yArr,k=1.0):
+    # loops over all the data points and applies lwlr to each one
     m = shape(testArr)[0]
     yHat = zeros(m)
     for i in range(m):
         yHat[i] = lwlr(testArr[i],xArr,yArr,k)
     return yHat
+
 
 def lwlrTestPlot(xArr,yArr,k=1.0):  #same thing as lwlrTest except it sorts X first
     yHat = zeros(shape(yArr))       #easier for plotting
@@ -43,8 +48,10 @@ def lwlrTestPlot(xArr,yArr,k=1.0):  #same thing as lwlrTest except it sorts X fi
         yHat[i] = lwlr(xCopy[i],xArr,yArr,k)
     return yHat,xCopy
 
+
 def rssError(yArr,yHatArr): #yArr and yHatArr both need to be arrays
     return ((yArr-yHatArr)**2).sum()
+
 
 def ridgeRegres(xMat,yMat,lam=0.2):
     xTx = xMat.T*xMat
@@ -54,7 +61,8 @@ def ridgeRegres(xMat,yMat,lam=0.2):
         return
     ws = denom.I * (xMat.T*yMat)
     return ws
-    
+
+
 def ridgeTest(xArr,yArr):
     xMat = mat(xArr); yMat=mat(yArr).T
     yMean = mean(yMat,0)
@@ -70,12 +78,14 @@ def ridgeTest(xArr,yArr):
         wMat[i,:]=ws.T
     return wMat
 
+
 def regularize(xMat):#regularize by columns
     inMat = xMat.copy()
     inMeans = mean(inMat,0)   #calc mean then subtract it off
     inVar = var(inMat,0)      #calc variance of Xi then divide by it
     inMat = (inMat - inMeans)/inVar
     return inMat
+
 
 def stageWise(xArr,yArr,eps=0.01,numIt=100):
     xMat = mat(xArr); yMat=mat(yArr).T
@@ -192,11 +202,24 @@ def crossValidation(xArr,yArr,numVal=10):
     meanErrors = mean(errorMat,0)#calc avg performance of the different ridge weight vectors
     minMean = float(min(meanErrors))
     bestWeights = wMat[nonzero(meanErrors==minMean)]
-    #can unregularize to get model
-    #when we regularized we wrote Xreg = (x-meanX)/var(x)
-    #we can now write in terms of x not Xreg:  x*w/var(x) - meanX/var(x) +meanY
-    xMat = mat(xArr); yMat=mat(yArr).T
-    meanX = mean(xMat,0); varX = var(xMat,0)
+    # can unregularize to get model
+    # when we regularized we wrote Xreg = (x-meanX)/var(x)
+    # we can now write in terms of x not Xreg:  x*w/var(x) - meanX/var(x) +meanY
+    xMat = mat(xArr)
+    yMat = mat(yArr).T
+    meanX = mean(xMat,0)
+    varX = var(xMat,0)
     unReg = bestWeights/varX
     print("the best model from Ridge Regression is:\n",unReg)
     print("with constant term: ",-1*sum(multiply(meanX,unReg)) + mean(yMat))
+
+
+if __name__ == '__main__':
+    try:
+        ex0_file = r"ex0.txt"
+        data_mat, label_mat = load_data_set(ex0_file)
+        ws = stand_regress(data_mat, label_mat)
+        print(ws)
+    except Exception as ex:
+        print(ex)
+    print("Run regression finish")
