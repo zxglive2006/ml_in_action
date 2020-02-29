@@ -1,38 +1,45 @@
-'''
-Created on Sep 16, 2010
+# coding=utf-8
+"""
 kNN: k Nearest Neighbors
-
-Input:      inX: vector to compare to existing dataset (1xN)
-            dataSet: size m data set of known vectors (NxM)
-            labels: data set labels (1xM vector)
+Input:      in_x: vector to compare to existing data set (1xN)
+            data_set: size m data set of known vectors (NxM)
+            _labels: data set _labels (1xM vector)
             k: number of neighbors to use for comparison (should be an odd number)
-            
 Output:     the most popular class label
-
-@author: pbharrin
-'''
+"""
 from numpy import *
 import operator
 from os import listdir
 
-def classify0(inX, dataSet, labels, k):
-    dataSetSize = dataSet.shape[0]
-    diffMat = tile(inX, (dataSetSize,1)) - dataSet
+
+def create_data_set():
+    _group = array([[1.0, 1.1], [1.0, 1.0], [0, 0], [0, 0.1]])
+    _labels = ['A', 'A', 'B', 'B']
+    return _group, _labels
+
+
+def classify0(in_x, data_set, _labels, k):
+    """
+    k-近邻分类
+    :param in_x: 用于分类的输入向量
+    :param data_set: 输入的训练样本集
+    :param _labels: 标签向量
+    :param k: 用于选择最近邻居的数目
+    :return:
+    """
+    data_set_size = data_set.shape[0]
+    diffMat = tile(in_x, (data_set_size, 1)) - data_set
     sqDiffMat = diffMat**2
     sqDistances = sqDiffMat.sum(axis=1)
     distances = sqDistances**0.5
     sortedDistIndicies = distances.argsort()     
-    classCount={}          
+    classCount = {}
     for i in range(k):
-        voteIlabel = labels[sortedDistIndicies[i]]
+        voteIlabel = _labels[sortedDistIndicies[i]]
         classCount[voteIlabel] = classCount.get(voteIlabel,0) + 1
-    sortedClassCount = sorted(classCount.iteritems(), key=operator.itemgetter(1), reverse=True)
+    sortedClassCount = sorted(classCount.items(), key=operator.itemgetter(1), reverse=True)
     return sortedClassCount[0][0]
 
-def createDataSet():
-    group = array([[1.0,1.1],[1.0,1.0],[0,0],[0,0.1]])
-    labels = ['A','A','B','B']
-    return group, labels
 
 def file2matrix(filename):
     love_dictionary={'largeDoses':3, 'smallDoses':2, 'didntLike':1}
@@ -40,7 +47,7 @@ def file2matrix(filename):
     arrayOLines = fr.readlines()
     numberOfLines = len(arrayOLines)            #get the number of lines in the file
     returnMat = zeros((numberOfLines,3))        #prepare matrix to return
-    classLabelVector = []                       #prepare labels return   
+    classLabelVector = []                       #prepare _labels return
     index = 0
     for line in arrayOLines:
         line = line.strip()
@@ -73,24 +80,25 @@ def datingClassTest():
     errorCount = 0.0
     for i in range(numTestVecs):
         classifierResult = classify0(normMat[i,:],normMat[numTestVecs:m,:],datingLabels[numTestVecs:m],3)
-        print "the classifier came back with: %d, the real answer is: %d" % (classifierResult, datingLabels[i])
-        if (classifierResult != datingLabels[i]): errorCount += 1.0
-    print "the total error rate is: %f" % (errorCount/float(numTestVecs))
-    print errorCount
-    
+        print("the classifier came back with: %d, the real answer is: %d" % (classifierResult, datingLabels[i]))
+        if classifierResult != datingLabels[i]:
+            errorCount += 1.0
+    print("the total error rate is: %f" % (errorCount/float(numTestVecs)))
+    print(errorCount)
+
+
 def classifyPerson():
     resultList = ['not at all', 'in small doses', 'in large doses']
-    percentTats = float(raw_input(\
-                                  "percentage of time spent playing video games?"))
-    ffMiles = float(raw_input("frequent flier miles earned per year?"))
-    iceCream = float(raw_input("liters of ice cream consumed per year?"))
+    percentTats = float(input("percentage of time spent playing video games?"))
+    ffMiles = float(input("frequent flier miles earned per year?"))
+    iceCream = float(input("liters of ice cream consumed per year?"))
     datingDataMat, datingLabels = file2matrix('datingTestSet2.txt')
     normMat, ranges, minVals = autoNorm(datingDataMat)
     inArr = array([ffMiles, percentTats, iceCream, ])
-    classifierResult = classify0((inArr - \
-                                  minVals)/ranges, normMat, datingLabels, 3)
-    print "You will probably like this person: %s" % resultList[classifierResult - 1]
-    
+    classifierResult = classify0((inArr - minVals)/ranges, normMat, datingLabels, 3)
+    print("You will probably like this person: %s" % resultList[classifierResult - 1])
+
+
 def img2vector(filename):
     returnVect = zeros((1,1024))
     fr = open(filename)
@@ -120,7 +128,16 @@ def handwritingClassTest():
         classNumStr = int(fileStr.split('_')[0])
         vectorUnderTest = img2vector('testDigits/%s' % fileNameStr)
         classifierResult = classify0(vectorUnderTest, trainingMat, hwLabels, 3)
-        print "the classifier came back with: %d, the real answer is: %d" % (classifierResult, classNumStr)
-        if (classifierResult != classNumStr): errorCount += 1.0
-    print "\nthe total number of errors is: %d" % errorCount
-    print "\nthe total error rate is: %f" % (errorCount/float(mTest))
+        print("the classifier came back with: %d, the real answer is: %d" % (classifierResult, classNumStr))
+        if classifierResult != classNumStr:
+            errorCount += 1.0
+    print("\nthe total number of errors is: %d" % errorCount)
+    print("\nthe total error rate is: %f" % (errorCount/float(mTest)))
+
+
+if __name__ == '__main__':
+    group, labels = create_data_set()
+    print(group)
+    print(labels)
+    print(classify0([0, 0], group, labels, 3))
+    print("Run kNN finish")
