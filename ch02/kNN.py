@@ -10,6 +10,7 @@ Output:     the most popular class label
 from numpy import *
 import operator
 from os import listdir
+import matplotlib.pyplot as plt
 
 
 def create_data_set():
@@ -46,64 +47,67 @@ def classify0(in_x, data_set, _labels, k):
 
 
 def file2matrix(filename):
-    love_dictionary={'largeDoses': 3, 'smallDoses': 2, 'didntLike': 1}
+    """
+    将文本记录转换为Numpy的解析程序
+    :param filename:
+    :return:
+    """
+    love_dictionary = {'largeDoses': 3, 'smallDoses': 2, 'didntLike': 1}
     fr = open(filename)
-    arrayOLines = fr.readlines()
-    numberOfLines = len(arrayOLines)            # get the number of lines in the file
-    returnMat = zeros((numberOfLines, 3))        # prepare matrix to return
-    classLabelVector = []                       # prepare _labels return
+    array_of_lines = fr.readlines()
+    number_of_lines = len(array_of_lines)           # get the number of lines in the file
+    return_mat = zeros((number_of_lines, 3))        # prepare matrix to return
+    class_label_vector = []                         # prepare _labels return
     index = 0
-    for line in arrayOLines:
+    for line in array_of_lines:
         line = line.strip()
-        listFromLine = line.split('\t')
-        returnMat[index,:] = listFromLine[0:3]
-        if(listFromLine[-1].isdigit()):
-            classLabelVector.append(int(listFromLine[-1]))
+        list_from_line = line.split('\t')
+        return_mat[index, :] = list_from_line[0:3]
+        if list_from_line[-1].isdigit():
+            class_label_vector.append(int(list_from_line[-1]))
         else:
-            classLabelVector.append(love_dictionary.get(listFromLine[-1]))
+            class_label_vector.append(love_dictionary.get(list_from_line[-1]))
         index += 1
-    return returnMat,classLabelVector
+    return return_mat, class_label_vector
 
     
-def autoNorm(dataSet):
-    minVals = dataSet.min(0)
-    maxVals = dataSet.max(0)
-    ranges = maxVals - minVals
-    normDataSet = zeros(shape(dataSet))
-    m = dataSet.shape[0]
-    normDataSet = dataSet - tile(minVals, (m,1))
-    normDataSet = normDataSet/tile(ranges, (m,1))   #element wise divide
-    return normDataSet, ranges, minVals
+def auto_norm(_data_set):
+    _min_vals = _data_set.min(0)
+    _max_vals = _data_set.max(0)
+    _ranges = _max_vals - _min_vals
+    m = _data_set.shape[0]
+    norm_data_set = _data_set - tile(_min_vals, (m, 1))
+    norm_data_set = norm_data_set / tile(_ranges, (m, 1))   # element wise divide
+    return norm_data_set, _ranges, _min_vals
 
 
-def datingClassTest():
-    hoRatio = 0.50      # hold out 10%
-    datingDataMat, datingLabels = file2matrix('datingTestSet2.txt')       # load data set from file
-    normMat, ranges, minVals = autoNorm(datingDataMat)
-    m = normMat.shape[0]
-    numTestVecs = int(m*hoRatio)
-    errorCount = 0.0
-    for i in range(numTestVecs):
-        classifierResult = classify0(
-            normMat[i,:], normMat[numTestVecs:m,:], datingLabels[numTestVecs:m],3)
+def dating_class_test():
+    ho_ratio = 0.10      # hold out 10%
+    _dating_data_mat, _dating_labels = file2matrix('datingTestSet.txt')       # load data set from file
+    norm_mat, ranges, min_vals = auto_norm(_dating_data_mat)
+    m = norm_mat.shape[0]
+    num_test_vecs = int(m * ho_ratio)
+    error_count = 0.0
+    for i in range(num_test_vecs):
+        classifier_result = classify0(
+            norm_mat[i, :], norm_mat[num_test_vecs:m, :], _dating_labels[num_test_vecs:m], 3)
         print("the classifier came back with: %d, the real answer is: %d"
-              % (classifierResult, datingLabels[i]))
-        if classifierResult != datingLabels[i]:
-            errorCount += 1.0
-    print("the total error rate is: %f" % (errorCount/float(numTestVecs)))
-    print(errorCount)
+              % (classifier_result, _dating_labels[i]))
+        if classifier_result != _dating_labels[i]:
+            error_count += 1.0
+    print("the total error rate is: %f" % (error_count / float(num_test_vecs)))
 
 
-def classifyPerson():
-    resultList = ['not at all', 'in small doses', 'in large doses']
-    percentTats = float(input("percentage of time spent playing video games?"))
-    ffMiles = float(input("frequent flier miles earned per year?"))
-    iceCream = float(input("liters of ice cream consumed per year?"))
-    datingDataMat, datingLabels = file2matrix('datingTestSet2.txt')
-    normMat, ranges, minVals = autoNorm(datingDataMat)
-    inArr = array([ffMiles, percentTats, iceCream, ])
-    classifierResult = classify0((inArr - minVals)/ranges, normMat, datingLabels, 3)
-    print("You will probably like this person: %s" % resultList[classifierResult - 1])
+def classify_person():
+    result_list = ['not at all', 'in small doses', 'in large doses']
+    percent_tats = float(input("percentage of time spent playing video games?"))
+    ff_miles = float(input("frequent flier miles earned per year?"))
+    ice_cream = float(input("liters of ice cream consumed per year?"))
+    dating_data_mat, dating_labels = file2matrix('datingTestSet2.txt')
+    norm_mat, ranges, min_vals = auto_norm(dating_data_mat)
+    inArr = array([ff_miles, percent_tats, ice_cream])
+    classifier_result = classify0((inArr - min_vals)/ranges, norm_mat, dating_labels, 3)
+    print("You will probably like this person: %s" % result_list[classifier_result - 1])
 
 
 def img2vector(filename):
@@ -146,8 +150,17 @@ def handwritingClassTest():
 
 
 if __name__ == '__main__':
-    group, labels = create_data_set()
-    print(group)
-    print(labels)
-    print(classify0([0, 0], group, labels, 3))
+    # group, labels = create_data_set()
+    # print(group)
+    # print(labels)
+    # print(classify0([0, 0], group, labels, 3))
+    # dating_data_mat, dating_labels = file2matrix(r"datingTestSet.txt")
+    # print(dating_data_mat)
+    # print(dating_labels[0:20])
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    # ax.scatter(dating_data_mat[:, 0], dating_data_mat[:, 1],
+    #            15.0*array(dating_labels), 15.0*array(dating_labels))
+    # plt.show()
+    dating_class_test()
     print("Run kNN finish")
