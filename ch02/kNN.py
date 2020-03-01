@@ -10,7 +10,6 @@ Output:     the most popular class label
 from numpy import *
 import operator
 from os import listdir
-import matplotlib.pyplot as plt
 
 
 def create_data_set():
@@ -111,42 +110,41 @@ def classify_person():
 
 
 def img2vector(filename):
-    returnVect = zeros((1, 1024))
+    return_vector = zeros((1, 1024))
     fr = open(filename)
     for i in range(32):
-        lineStr = fr.readline()
+        line_str = fr.readline()
         for j in range(32):
-            returnVect[0,32*i+j] = int(lineStr[j])
-    return returnVect
+            return_vector[0, 32*i+j] = int(line_str[j])
+    return return_vector
 
 
-def handwritingClassTest():
-    hwLabels = []
-    trainingFileList = listdir('trainingDigits')           # load the training set
-    m = len(trainingFileList)
-    trainingMat = zeros((m,1024))
+def handwriting_class_test():
+    hw_labels = []
+    training_file_list = listdir('trainingDigits')           # load the training set
+    m = len(training_file_list)
+    training_mat = zeros((m, 1024))
     for i in range(m):
-        fileNameStr = trainingFileList[i]
-        fileStr = fileNameStr.split('.')[0]     # take off .txt
-        classNumStr = int(fileStr.split('_')[0])
-        hwLabels.append(classNumStr)
-        trainingMat[i,:] = img2vector('trainingDigits/%s' % fileNameStr)
-    testFileList = listdir('testDigits')        # iterate through the test set
-    errorCount = 0.0
-    mTest = len(testFileList)
-    for i in range(mTest):
-        fileNameStr = testFileList[i]
-        fileStr = fileNameStr.split('.')[0]     # take off .txt
-        classNumStr = int(fileStr.split('_')[0])
-        vectorUnderTest = img2vector('testDigits/%s' % fileNameStr)
-        classifierResult = classify0(vectorUnderTest, trainingMat, hwLabels, 3)
+        file_name_str = training_file_list[i]
+        file_str = file_name_str.split('.')[0]     # take off .txt
+        class_num_str = int(file_str.split('_')[0])
+        hw_labels.append(class_num_str)
+        training_mat[i, :] = img2vector('trainingDigits/%s' % file_name_str)
+    test_file_list = listdir('testDigits')        # iterate through the test set
+    error_count = 0.0
+    m_test = len(test_file_list)
+    for i in range(m_test):
+        file_name_str = test_file_list[i]
+        file_str = file_name_str.split('.')[0]     # take off .txt
+        class_num_str = int(file_str.split('_')[0])
+        vector_under_test = img2vector('testDigits/%s' % file_name_str)
+        classifier_result = classify0(vector_under_test, training_mat, hw_labels, 3)
         print("the classifier came back with: %d, the real answer is: %d"
-              % (classifierResult, classNumStr))
-        if classifierResult != classNumStr:
-            errorCount += 1.0
-    print("\n")
-    print("the total number of errors is: %d" % errorCount)
-    print("the total error rate is: %f" % (errorCount/float(mTest)))
+              % (classifier_result, class_num_str))
+        if classifier_result != class_num_str:
+            error_count += 1.0
+    print("the total number of errors is: %d" % error_count)
+    print("the total error rate is: %f" % (error_count/float(m_test)))
 
 
 if __name__ == '__main__':
@@ -157,10 +155,15 @@ if __name__ == '__main__':
     # dating_data_mat, dating_labels = file2matrix(r"datingTestSet.txt")
     # print(dating_data_mat)
     # print(dating_labels[0:20])
+    # import matplotlib.pyplot as plt
     # fig = plt.figure()
     # ax = fig.add_subplot(111)
     # ax.scatter(dating_data_mat[:, 0], dating_data_mat[:, 1],
     #            15.0*array(dating_labels), 15.0*array(dating_labels))
     # plt.show()
-    dating_class_test()
+    # dating_class_test()
+    # test_vector = img2vector(r"testDigits\0_13.txt")
+    # print(test_vector[0, 0:31])
+    # print(test_vector[0, 32:63])
+    handwriting_class_test()
     print("Run kNN finish")
