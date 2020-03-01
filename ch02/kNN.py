@@ -148,10 +148,10 @@ def handwriting_class_test():
 
 
 if __name__ == '__main__':
-    # group, labels = create_data_set()
+    # group, _labels = create_data_set()
     # print(group)
-    # print(labels)
-    # print(classify0([0, 0], group, labels, 3))
+    # print(_labels)
+    # print(classify0([0, 0], group, _labels, 3))
     # dating_data_mat, dating_labels = file2matrix(r"datingTestSet.txt")
     # print(dating_data_mat)
     # print(dating_labels[0:20])
