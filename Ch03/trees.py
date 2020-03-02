@@ -112,38 +112,51 @@ def create_tree(_data_set, _labels):
     return my_tree
 
 
-def classify(input_tree, featLabels, testVec):
-    firstStr = input_tree.keys()[0]
-    secondDict = input_tree[firstStr]
-    featIndex = featLabels.index(firstStr)
-    key = testVec[featIndex]
-    valueOfFeat = secondDict[key]
-    if isinstance(valueOfFeat, dict): 
-        classLabel = classify(valueOfFeat, featLabels, testVec)
+def classify(input_tree, feat_labels, test_vec):
+    """
+    使用决策树的分类函数
+    :param input_tree:
+    :param feat_labels:
+    :param test_vec:
+    :return:
+    """
+    first_str = list(input_tree.keys())[0]
+    second_dict = input_tree[first_str]
+    feat_index = feat_labels.index(first_str)
+    key = test_vec[feat_index]
+    value_of_feat = second_dict[key]
+    if isinstance(value_of_feat, dict):
+        class_label = classify(value_of_feat, feat_labels, test_vec)
     else:
-        classLabel = valueOfFeat
-    return classLabel
+        class_label = value_of_feat
+    return class_label
 
 
-def storeTree(inputTree, filename):
+def store_tree(_input_tree, filename):
     import pickle
-    fw = open(filename, 'w')
-    pickle.dump(inputTree,fw)
+    fw = open(filename, 'wb')
+    pickle.dump(_input_tree, fw)
     fw.close()
 
 
-def grabTree(filename):
+def grab_tree(filename):
     import pickle
-    fr = open(filename)
+    fr = open(filename, "rb")
     return pickle.load(fr)
     
 
 if __name__ == '__main__':
-    myDat, labels = create_data_set()
-    print(myDat)
+    # myDat, labels = create_data_set()
+    # print(labels)
     # print(split_data_set(myDat, 0, 1))
     # print(split_data_set(myDat, 0, 0))
     # print(choose_best_feature_to_split(myDat))
-    myTree = create_tree(myDat, labels)
-    print(myTree)
+    # from ch03.treePlotter import retrieve_tree
+    # my_tree = retrieve_tree(0)
+    # print(my_tree)
+    # print(classify(my_tree, labels, [1, 0]))
+    # print(classify(my_tree, labels, [1, 1]))
+    # store_tree(my_tree, 'classifierStorage.txt')
+    my_tree = grab_tree("classifierStorage.txt")
+    print(my_tree)
     print("Run Decision Tree finish")
