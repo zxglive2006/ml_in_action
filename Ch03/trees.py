@@ -157,6 +157,14 @@ if __name__ == '__main__':
     # print(classify(my_tree, labels, [1, 0]))
     # print(classify(my_tree, labels, [1, 1]))
     # store_tree(my_tree, 'classifierStorage.txt')
-    my_tree = grab_tree("classifierStorage.txt")
-    print(my_tree)
+    # my_tree = grab_tree("classifierStorage.txt")
+    # print(my_tree)
+    fr = open("lenses.txt")
+    lenses = [inst.strip().split('\t') for inst in fr.readlines()]
+    print(lenses[:3])
+    lenses_labels = ['age', 'prescript', 'astigmatic', 'tearRate']
+    lenses_tree = create_tree(lenses, lenses_labels)
+    print(lenses_tree)
+    from ch03.treePlotter import create_plot
+    create_plot(lenses_tree)
     print("Run Decision Tree finish")
