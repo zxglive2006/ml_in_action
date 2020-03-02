@@ -85,6 +85,12 @@ def majority_cnt(class_list):
 
 
 def create_tree(_data_set, _labels):
+    """
+    创建决策树
+    :param _data_set: 数据集
+    :param _labels: 标签列表
+    :return:
+    """
     class_list = [example[-1] for example in _data_set]
     if class_list.count(class_list[0]) == len(class_list):
         # stop splitting when all of the classes are equal
@@ -106,9 +112,9 @@ def create_tree(_data_set, _labels):
     return my_tree
 
 
-def classify(inputTree, featLabels, testVec):
-    firstStr = inputTree.keys()[0]
-    secondDict = inputTree[firstStr]
+def classify(input_tree, featLabels, testVec):
+    firstStr = input_tree.keys()[0]
+    secondDict = input_tree[firstStr]
     featIndex = featLabels.index(firstStr)
     key = testVec[featIndex]
     valueOfFeat = secondDict[key]
