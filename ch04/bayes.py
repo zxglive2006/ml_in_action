@@ -99,7 +99,7 @@ def text_parse(big_string):
     :return: word list
     """
     import re
-    list_of_tokens = re.split(r'\W*', big_string)
+    list_of_tokens = re.split(r'\W+', big_string)
     return [tok.lower() for tok in list_of_tokens if len(tok) > 2]
 
 
@@ -117,7 +117,7 @@ def spam_test():
         full_text.extend(word_list)
         class_list.append(0)
     vocab_list = create_vocab_list(doc_list)      # create vocabulary
-    training_set = range(50)
+    training_set = list(range(50))
     test_set = []         # create test set
     for i in range(10):
         rand_index = int(random.uniform(0, len(training_set)))
@@ -208,5 +208,6 @@ def get_top_words(ny, sf):
 
 
 if __name__ == '__main__':
-    testing_nb()
+    # testing_nb()
+    spam_test()
     print("Run bayes finish")
