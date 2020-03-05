@@ -1,8 +1,10 @@
+# coding=utf-8
 """
 Created on Jan 8, 2011
 @author: Peter
 """
 from numpy import *
+import matplotlib.pyplot as plt
 from common.util import load_data_set
 
 
@@ -17,11 +19,13 @@ def stand_regress(x_arr, y_arr):
 
 
 def lwlr(testPoint, xArr, yArr, k=1.0):
-    xMat = mat(xArr); yMat = mat(yArr).T
+    xMat = mat(xArr)
+    yMat = mat(yArr).T
     m = shape(xMat)[0]
     weights = mat(eye((m)))
-    for j in range(m):                      #next 2 lines create weights matrix
-        diffMat = testPoint - xMat[j,:]     #
+    # next 2 lines create weights matrix
+    for j in range(m):
+        diffMat = testPoint - xMat[j,:]
         weights[j,j] = exp(diffMat*diffMat.T/(-2.0*k**2))
     xTx = xMat.T * (weights * xMat)
     if linalg.det(xTx) == 0.0:
@@ -31,7 +35,7 @@ def lwlr(testPoint, xArr, yArr, k=1.0):
     return testPoint * ws
 
 
-def lwlrTest(testArr,xArr,yArr,k=1.0):
+def lwlrTest(testArr, xArr, yArr, k=1.0):
     # loops over all the data points and applies lwlr to each one
     m = shape(testArr)[0]
     yHat = zeros(m)
@@ -40,8 +44,8 @@ def lwlrTest(testArr,xArr,yArr,k=1.0):
     return yHat
 
 
-def lwlrTestPlot(xArr,yArr,k=1.0):  #same thing as lwlrTest except it sorts X first
-    yHat = zeros(shape(yArr))       #easier for plotting
+def lwlrTestPlot(xArr, yArr, k=1.0):    # same thing as lwlrTest except it sorts X first
+    yHat = zeros(shape(yArr))           # easier for plotting
     xCopy = mat(xArr)
     xCopy.sort(0)
     for i in range(shape(xArr)[0]):
@@ -49,11 +53,11 @@ def lwlrTestPlot(xArr,yArr,k=1.0):  #same thing as lwlrTest except it sorts X fi
     return yHat,xCopy
 
 
-def rssError(yArr,yHatArr): #yArr and yHatArr both need to be arrays
+def rssError(yArr,yHatArr):         # yArr and yHatArr both need to be arrays
     return ((yArr-yHatArr)**2).sum()
 
 
-def ridgeRegres(xMat,yMat,lam=0.2):
+def ridgeRegres(xMat, yMat, lam=0.2):
     xTx = xMat.T*xMat
     denom = xTx + eye(shape(xMat)[1])*lam
     if linalg.det(denom) == 0.0:
@@ -63,13 +67,13 @@ def ridgeRegres(xMat,yMat,lam=0.2):
     return ws
 
 
-def ridgeTest(xArr,yArr):
+def ridgeTest(xArr, yArr):
     xMat = mat(xArr); yMat=mat(yArr).T
     yMean = mean(yMat,0)
-    yMat = yMat - yMean     #to eliminate X0 take mean off of Y
-    #regularize X's
-    xMeans = mean(xMat,0)   #calc mean then subtract it off
-    xVar = var(xMat,0)      #calc variance of Xi then divide by it
+    yMat = yMat - yMean         # to eliminate X0 take mean off of Y
+    # regularize X's
+    xMeans = mean(xMat, 0)       # calc mean then subtract it off
+    xVar = var(xMat, 0)          # calc variance of Xi then divide by it
     xMat = (xMat - xMeans)/xVar
     numTestPts = 30
     wMat = zeros((numTestPts,shape(xMat)[1]))
@@ -79,25 +83,26 @@ def ridgeTest(xArr,yArr):
     return wMat
 
 
-def regularize(xMat):#regularize by columns
+def regularize(xMat):           # regularize by columns
     inMat = xMat.copy()
-    inMeans = mean(inMat,0)   #calc mean then subtract it off
-    inVar = var(inMat,0)      #calc variance of Xi then divide by it
+    inMeans = mean(inMat, 0)     # calc mean then subtract it off
+    inVar = var(inMat, 0)        # calc variance of Xi then divide by it
     inMat = (inMat - inMeans)/inVar
     return inMat
 
 
-def stageWise(xArr,yArr,eps=0.01,numIt=100):
-    xMat = mat(xArr); yMat=mat(yArr).T
+def stageWise(xArr, yArr, eps=0.01, numIt=100):
+    xMat = mat(xArr)
+    yMat=mat(yArr).T
     yMean = mean(yMat,0)
-    yMat = yMat - yMean     #can also regularize ys but will get smaller coef
+    yMat = yMat - yMean         # can also regularize ys but will get smaller coef
     xMat = regularize(xMat)
-    m,n=shape(xMat)
+    m, n=shape(xMat)
     #returnMat = zeros((numIt,n)) #testing code remove
     ws = zeros((n,1)); wsTest = ws.copy(); wsMax = ws.copy()
     for i in range(numIt):
         print(ws.T)
-        lowestError = inf; 
+        lowestError = inf
         for j in range(n):
             for sign in [-1,1]:
                 wsTest = ws.copy()
@@ -175,31 +180,33 @@ def setDataCollect(retX, retY):
     searchForSet(retX, retY, 10196, 2009, 3263, 249.99)
 
 
-def crossValidation(xArr,yArr,numVal=10):
+def crossValidation(xArr, yArr, numVal=10):
     m = len(yArr)                           
     indexList = range(m)
-    errorMat = zeros((numVal,30))#create error mat 30columns numVal rows
+    errorMat = zeros((numVal,30))   # create error mat 30columns numVal rows
     for i in range(numVal):
         trainX=[]; trainY=[]
         testX = []; testY = []
         random.shuffle(indexList)
-        for j in range(m):#create training set based on first 90% of values in indexList
+        # create training set based on first 90% of values in indexList
+        for j in range(m):
             if j < m*0.9: 
                 trainX.append(xArr[indexList[j]])
                 trainY.append(yArr[indexList[j]])
             else:
                 testX.append(xArr[indexList[j]])
                 testY.append(yArr[indexList[j]])
-        wMat = ridgeTest(trainX,trainY)    #get 30 weight vectors from ridge
-        for k in range(30):#loop over all of the ridge estimates
-            matTestX = mat(testX); matTrainX=mat(trainX)
+        wMat = ridgeTest(trainX,trainY)     # get 30 weight vectors from ridge
+        for k in range(30):                 # loop over all of the ridge estimates
+            matTestX = mat(testX)
+            matTrainX=mat(trainX)
             meanTrain = mean(matTrainX,0)
             varTrain = var(matTrainX,0)
-            matTestX = (matTestX-meanTrain)/varTrain #regularize test with training params
-            yEst = matTestX * mat(wMat[k,:]).T + mean(trainY)#test ridge results and store
+            matTestX = (matTestX-meanTrain)/varTrain    # regularize test with training params
+            yEst = matTestX * mat(wMat[k,:]).T + mean(trainY)   # test ridge results and store
             errorMat[i,k]=rssError(yEst.T.A,array(testY))
             #print errorMat[i,k]
-    meanErrors = mean(errorMat,0)#calc avg performance of the different ridge weight vectors
+    meanErrors = mean(errorMat, 0)   # calc avg performance of the different ridge weight vectors
     minMean = float(min(meanErrors))
     bestWeights = wMat[nonzero(meanErrors==minMean)]
     # can unregularize to get model
@@ -207,19 +214,32 @@ def crossValidation(xArr,yArr,numVal=10):
     # we can now write in terms of x not Xreg:  x*w/var(x) - meanX/var(x) +meanY
     xMat = mat(xArr)
     yMat = mat(yArr).T
-    meanX = mean(xMat,0)
+    meanX = mean(xMat, 0)
     varX = var(xMat,0)
     unReg = bestWeights/varX
-    print("the best model from Ridge Regression is:\n",unReg)
-    print("with constant term: ",-1*sum(multiply(meanX,unReg)) + mean(yMat))
+    print("the best model from Ridge Regression is:\n", unReg)
+    print("with constant term: ", -1*sum(multiply(meanX, unReg)) + mean(yMat))
 
 
-if __name__ == '__main__':
+def line_regression_test():
     try:
-        ex0_file = r"ex0.txt"
-        data_mat, label_mat = load_data_set(ex0_file)
-        ws = stand_regress(data_mat, label_mat)
+        x_arr, y_arr = load_data_set(r"ex0.txt")
+        print(x_arr[0:2])
+        ws = stand_regress(x_arr, y_arr)
         print(ws)
+        x_mat = mat(x_arr)
+        y_mat = mat(y_arr)
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.scatter(x_mat[:, 1].flatten().A[0], y_mat.T[:, 0].flatten().A[0])
+        x_copy = x_mat.copy()
+        x_copy.sort(0)
+        y_hat = x_copy * ws
+        ax.plot(x_copy[:, 1], y_hat)
+        plt.show()
     except Exception as ex:
         print(ex)
+
+if __name__ == '__main__':
+    line_regression_test()
     print("Run regression finish")
