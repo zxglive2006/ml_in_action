@@ -2,6 +2,8 @@
 """
 Created on Oct 19, 2010
 @author: Peter
+NASA RSS Feeds：https://www.nasa.gov/content/nasa-rss-feeds
+停用词表：https://www.ranks.nl/stopwords
 """
 from numpy import *
 
@@ -55,7 +57,7 @@ def train_nb0(train_matrix, train_category):
         else:
             p0_num += train_matrix[i]
             p0_denom += sum(train_matrix[i])
-    p1_vect = log(p1_num/p1_denom)          # change to log()
+    p1_vect = log(p1_num/p1_denom)          # change to log(), 自然对数
     p0_vect = log(p0_num/p0_denom)          # change to log()
     return p0_vect, p1_vect, p_abusive
 
@@ -69,7 +71,7 @@ def classify_nb(vec2_classify, p0_vec, p1_vec, p_class1):
         return 0
 
 
-def bag_of_words_to_vec_mn(vocab_list, input_set):
+def bag_of_words_to_vec(vocab_list, input_set):
     return_vec = [0]*len(vocab_list)
     for word in input_set:
         if word in vocab_list:
@@ -95,7 +97,7 @@ def testing_nb():
 def text_parse(big_string):
     """
     文本分解
-    :param big_string: big string
+    :param big_string: 文本字符串
     :return: word list
     """
     import re
@@ -117,26 +119,30 @@ def spam_test():
         full_text.extend(word_list)
         class_list.append(0)
     vocab_list = create_vocab_list(doc_list)      # create vocabulary
-    training_set = list(range(50))
+    total_size = 50
+    test_set_size = int(0.2 * total_size)
+    print("total size:{}, test set size:{}".format(total_size, test_set_size))
+    training_set = list(range(total_size))
     test_set = []         # create test set
-    for i in range(10):
+    for i in range(test_set_size):
         rand_index = int(random.uniform(0, len(training_set)))
         test_set.append(training_set[rand_index])
-        del(training_set[rand_index])
+        del training_set[rand_index]
     train_mat = []
     train_classes = []
-    for docIndex in training_set:    # train the classifier (get probs) trainNB0
-        train_mat.append(bag_of_words_to_vec_mn(vocab_list, doc_list[docIndex]))
-        train_classes.append(class_list[docIndex])
+    for doc_index in training_set:
+        train_mat.append(bag_of_words_to_vec(vocab_list, doc_list[doc_index]))
+        train_classes.append(class_list[doc_index])
+    # train the classifier (get probability) trainNB0
     p0_v, p1_v, p_spam = train_nb0(array(train_mat), array(train_classes))
     error_count = 0
-    for docIndex in test_set:        # classify the remaining items
-        word_vector = bag_of_words_to_vec_mn(vocab_list, doc_list[docIndex])
-        if classify_nb(array(word_vector), p0_v, p1_v, p_spam) != class_list[docIndex]:
+    for doc_index in test_set:        # classify the remaining items
+        word_vector = bag_of_words_to_vec(vocab_list, doc_list[doc_index])
+        if classify_nb(array(word_vector), p0_v, p1_v, p_spam) != class_list[doc_index]:
             error_count += 1
-            print("classification error", doc_list[docIndex])
+            print("classification error: ", doc_list[doc_index])
     print('the error rate is: ', float(error_count)/len(test_set))
-    # return vocab_list, full_text
+    return vocab_list, full_text
 
 
 def calc_most_freq(vocab_list, full_text):
@@ -157,7 +163,7 @@ def local_words(feed1, feed0):
         word_list = text_parse(feed1['entries'][i]['summary'])
         doc_list.append(word_list)
         full_text.extend(word_list)
-        class_list.append(1)    # NY is class 1
+        class_list.append(1)
         word_list = text_parse(feed0['entries'][i]['summary'])
         doc_list.append(word_list)
         full_text.extend(word_list)
@@ -167,24 +173,26 @@ def local_words(feed1, feed0):
     for pairW in top30_words:
         if pairW[0] in vocab_list:
             vocab_list.remove(pairW[0])
-    training_set = range(2*min_len)
+    total_size = 2 * min_len
+    training_set = list(range(total_size))
     test_set = []           # create test set
-    for i in range(20):
+    test_set_size = int(0.2 * total_size)
+    for i in range(test_set_size):
         rand_index = int(random.uniform(0, len(training_set)))
         test_set.append(training_set[rand_index])
         del(training_set[rand_index])
     train_mat = []
     train_classes = []
-    for docIndex in training_set:    # train the classifier (get probs) trainNB0
-        train_mat.append(bag_of_words_to_vec_mn(vocab_list, doc_list[docIndex]))
+    for docIndex in training_set:    # train the classifier (get probability) trainNB0
+        train_mat.append(bag_of_words_to_vec(vocab_list, doc_list[docIndex]))
         train_classes.append(class_list[docIndex])
     p0_v, p1_v, p_spam = train_nb0(array(train_mat), array(train_classes))
     error_count = 0
     for docIndex in test_set:        # classify the remaining items
-        word_vector = bag_of_words_to_vec_mn(vocab_list, doc_list[docIndex])
+        word_vector = bag_of_words_to_vec(vocab_list, doc_list[docIndex])
         if classify_nb(array(word_vector), p0_v, p1_v, p_spam) != class_list[docIndex]:
             error_count += 1
-    print('the error rate is: ', float(error_count)/len(test_set))
+    print('the error rate is: ', round(float(error_count)/len(test_set), 2))
     return vocab_list, p0_v, p1_v
 
 
@@ -210,4 +218,8 @@ def get_top_words(ny, sf):
 if __name__ == '__main__':
     # testing_nb()
     spam_test()
+    # import feedparser
+    # breaking_news = feedparser.parse('https://www.nasa.gov/rss/dyn/breaking_news.rss')
+    # education_news = feedparser.parse("https://www.nasa.gov/rss/dyn/educationnews.rss")
+    # vocabList, p_nasa, p_cpp_blog = local_words(breaking_news, education_news)
     print("Run bayes finish")

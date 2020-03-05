@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?> <rss version="2.0" xml:base="http://www.nasa.gov/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/"> <channel> <title>Education News</title>
+ <description>A RSS feed containing the latest education related news from NASA.</description>
+ <link>http://www.nasa.gov/</link>
+ <atom:link rel="self" href="http://www.nasa.gov/rss/dyn/educationnews.rss" />
+ <language>en-us</language>
+ <managingEditor>sandra.b.may@nasa.gov</managingEditor>
+ <webMaster>brian.dunbar@nasa.gov</webMaster>
+ <item> <title>Winners of 2020 NASA Langley Student Art Contest Named</title>
+ <link>http://www.nasa.gov/feature/langley/winners-of-2020-nasa-langley-student-art-contest-named</link>
+ <description>This year’s contest received a record 1,277 entries from students across the United States.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/2020_art_contest_web_and_social_banners_artboard_26.png?itok=nLWHDgsT" length="576255" type="image/png" />
+ <guid isPermaLink="false">http://www.nasa.gov/feature/langley/winners-of-2020-nasa-langley-student-art-contest-named</guid>
+ <pubDate>Mon, 02 Mar 2020 12:40 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+ <item> <title>#BeAnAstronaut: NASA Seeks Applicants to Explore Moon, Mars</title>
+ <link>http://www.nasa.gov/press-release/beanastronaut-nasa-seeks-applicants-to-explore-moon-mars</link>
+ <description>For the first time in more than four years, NASA began accepting applications Monday for future astronauts. Aspiring Moon to Mars explorers have until 11:59 p.m. EDT Tuesday, March 31, to apply.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/jsc2020e000607.jpg?itok=ZIE8-QmL" length="723924" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/beanastronaut-nasa-seeks-applicants-to-explore-moon-mars</guid>
+ <pubDate>Mon, 02 Mar 2020 08:36 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+ <item> <title>NASA Highlights Minority STEM Education Outreach at CIAA Basketball Tournament</title>
+ <link>http://www.nasa.gov/feature/langley/nasa-highlights-minority-stem-education-outreach-at-ciaa-basketball-tournament</link>
+ <description>Billed as “Education Day,” the CIAA partners with science, technology, education and math educators to bring interactive STEM outreach to mostly minority students.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/mad_scientists.jpg?itok=MMSDB6lU" length="2288970" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/feature/langley/nasa-highlights-minority-stem-education-outreach-at-ciaa-basketball-tournament</guid>
+ <pubDate>Wed, 26 Feb 2020 09:22 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+ <item> <title>Florida Students to Speak with NASA Astronaut Aboard Space Station</title>
+ <link>http://www.nasa.gov/press-release/florida-students-to-speak-with-nasa-astronaut-aboard-space-station</link>
+ <description>Florida students will have an opportunity this week to talk with a NASA astronaut aboard the International Space Station.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/iss062e014335_0.jpg?itok=L1HY0vdl" length="2124074" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/florida-students-to-speak-with-nasa-astronaut-aboard-space-station</guid>
+ <pubDate>Tue, 25 Feb 2020 08:49 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+ <item> <title>NASA Selects Proposals for Student Aeronautics, Space Projects</title>
+ <link>http://www.nasa.gov/press-release/nasa-selects-proposals-for-student-aeronautics-space-projects</link>
+ <description>NASA has awarded more than $39.8 million through the agency’s National Space Grant College and Fellowship Project to increase student and faculty engagement in STEM at community colleges, technical schools and universities across the nation.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/3._jessica_frantz_receiving_signal_from_payload_phoenix_college1.jpg?itok=TxhePKoL" length="97830" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-selects-proposals-for-student-aeronautics-space-projects</guid>
+ <pubDate>Fri, 21 Feb 2020 16:01 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+ <item> <title>Artemis Student Challenge: NASA Selects University Teams to Build Technologies for the Moon’s Darkest Areas</title>
+ <link>http://www.nasa.gov/feature/langley/artemis-student-challenge-nasa-selects-university-teams-to-build-technologies-for-the-moon-s</link>
+ <description>The selected teams will develop ways to collect data in and around permanently shadowed regions, generate wireless power for future infrastructure, enable autonomous mobility even in the most extreme environments, and more.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/bigidea_crater_scene_v2_updated.jpg?itok=ZTe5qZCI" length="1089643" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/feature/langley/artemis-student-challenge-nasa-selects-university-teams-to-build-technologies-for-the-moon-s</guid>
+ <pubDate>Fri, 14 Feb 2020 11:00 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+ <item> <title>NASA to Pay Tribute to Fallen Heroes with Day of Remembrance</title>
+ <link>http://www.nasa.gov/press-release/nasa-to-pay-tribute-to-fallen-heroes-with-day-of-remembrance</link>
+ <description>NASA will honor members of the NASA family who lost their lives while furthering the cause of exploration and discovery, including the crews of Apollo 1 and space shuttles Challenger and Columbia, during the agency&#039;s annual Day of Remembrance Thursday, Jan. 30.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/33146482478_81b08bb980_k.jpg?itok=cLQLRzd6" length="1101714" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-to-pay-tribute-to-fallen-heroes-with-day-of-remembrance</guid>
+ <pubDate>Fri, 24 Jan 2020 13:18 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+ <item> <title>International Students to Speak with NASA Astronauts Aboard Space Station</title>
+ <link>http://www.nasa.gov/press-release/international-students-to-speak-with-nasa-astronauts-aboard-space-station</link>
+ <description>International students in Panama will have an opportunity this week to talk with NASA astronauts aboard the International Space Station.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/iss061e006682.jpg?itok=QjLq2vJT" length="2888950" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/international-students-to-speak-with-nasa-astronauts-aboard-space-station</guid>
+ <pubDate>Tue, 21 Jan 2020 11:59 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+ <item> <title>Texas Students to Speak with NASA Astronauts Aboard Space Station</title>
+ <link>http://www.nasa.gov/press-release/texas-students-to-speak-with-nasa-astronauts-aboard-space-station</link>
+ <description>Students from Texas will have an opportunity this week to talk with three NASA astronauts aboard the International Space Station.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/koch.jpg?itok=kfswipNL" length="307070" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/texas-students-to-speak-with-nasa-astronauts-aboard-space-station</guid>
+ <pubDate>Mon, 13 Jan 2020 10:30 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+ <item> <title>NASA’s Newest Astronauts Ready for Space Station, Moon, and Mars Missions</title>
+ <link>http://www.nasa.gov/press-release/nasa-s-newest-astronauts-ready-for-space-station-moon-and-mars-missions</link>
+ <description>NASA welcomed 11 new astronauts to its ranks Friday, increasing the number of those eligible for spaceflight assignments that will expand humanity’s horizons in space for generations to come.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/jsc2020e000607.jpg?itok=ZIE8-QmL" length="723924" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-s-newest-astronauts-ready-for-space-station-moon-and-mars-missions</guid>
+ <pubDate>Fri, 10 Jan 2020 10:30 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/educationnews.rss">Education News</source>
+</item>
+</channel>
+</rss>

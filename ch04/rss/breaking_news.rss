@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?> <rss version="2.0" xml:base="http://www.nasa.gov/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/"> <channel> <title>NASA Breaking News</title>
+ <description>A RSS news feed containing the latest NASA news articles and press releases.</description>
+ <link>http://www.nasa.gov/</link>
+ <atom:link rel="self" href="http://www.nasa.gov/rss/dyn/breaking_news.rss" />
+ <language>en-us</language>
+ <managingEditor>jim.wilson@nasa.gov</managingEditor>
+ <webMaster>brian.dunbar@nasa.gov</webMaster>
+ <docs>http://blogs.harvard.edu/tech/rss</docs>
+ <item> <title>NASA to Reveal Name of Next Mars Rover, Hold Media Teleconference</title>
+ <link>http://www.nasa.gov/press-release/nasa-to-reveal-name-of-next-mars-rover-hold-media-teleconference</link>
+ <description>NASA will unveil the name of the agency’s next Mars rover, currently known as Mars 2020, during a live event on NASA Television at 1:30 p.m. EST Thursday, March 5, followed by a media teleconference at 3:30 p.m. about the mission and the naming.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/name_a2.jpg?itok=4dcMW-y6" length="6084514" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-to-reveal-name-of-next-mars-rover-hold-media-teleconference</guid>
+ <pubDate>Tue, 03 Mar 2020 15:46 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458614</dc:identifier>
+</item>
+ <item> <title>NASA’s Urban Air Mobility Grand Challenge Advances with Agreement Signings</title>
+ <link>http://www.nasa.gov/press-release/nasa-s-urban-air-mobility-grand-challenge-advances-with-agreement-signings</link>
+ <description>NASA has signed Space Act Agreements with 17 companies in the aviation industry to advance plans for the first in a series of technology demonstrations known as the Urban Air Mobility (UAM) Grand Challenge.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/ov_1_great_hall_0.jpg?itok=5A4qm3MM" length="2754276" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-s-urban-air-mobility-grand-challenge-advances-with-agreement-signings</guid>
+ <pubDate>Tue, 03 Mar 2020 14:33 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458612</dc:identifier>
+</item>
+ <item> <title>NASA Invites Media to View Orion Spacecraft for First Artemis Lunar Mission</title>
+ <link>http://www.nasa.gov/press-release/nasa-invites-media-to-view-orion-spacecraft-for-first-artemis-lunar-mission</link>
+ <description>NASA’s Orion spacecraft, a critical part of the agency’s Artemis I mission, has completed its three-month test campaign at NASA’s Plum Brook Station in Sandusky, Ohio, where it was subjected to the extreme temperatures and electromagnetic environment it will experience in its upcoming test mission to the Moon.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/orion_5.jpg?itok=EyZWjcm4" length="1228757" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-invites-media-to-view-orion-spacecraft-for-first-artemis-lunar-mission</guid>
+ <pubDate>Mon, 02 Mar 2020 15:29 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458581</dc:identifier>
+</item>
+ <item> <title>#BeAnAstronaut: NASA Seeks Applicants to Explore Moon, Mars</title>
+ <link>http://www.nasa.gov/press-release/beanastronaut-nasa-seeks-applicants-to-explore-moon-mars</link>
+ <description>For the first time in more than four years, NASA began accepting applications Monday for future astronauts. Aspiring Moon to Mars explorers have until 11:59 p.m. EDT Tuesday, March 31, to apply.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/jsc2020e000607.jpg?itok=ZIE8-QmL" length="723924" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/beanastronaut-nasa-seeks-applicants-to-explore-moon-mars</guid>
+ <pubDate>Mon, 02 Mar 2020 08:36 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458562</dc:identifier>
+</item>
+ <item> <title>NASA TV Coverage Set for SpaceX’s Next Space Station Resupply Mission</title>
+ <link>http://www.nasa.gov/press-release/nasa-tv-coverage-set-for-spacex-s-next-space-station-resupply-mission</link>
+ <description>NASA commercial cargo provider SpaceX is targeting 11:49 p.m. EST Friday, March 6, for the launch of its 20th resupply mission to the International Space Station.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/46856594435_206c773b5a_o.jpg?itok=paw4Pq0R" length="1253492" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-tv-coverage-set-for-spacex-s-next-space-station-resupply-mission</guid>
+ <pubDate>Fri, 28 Feb 2020 17:34 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458560</dc:identifier>
+</item>
+ <item> <title>NASA Awards Launch Services Contract for the Psyche Mission</title>
+ <link>http://www.nasa.gov/press-release/nasa-awards-launch-services-contract-for-the-psyche-mission</link>
+ <description>NASA has selected SpaceX of Hawthorne, California, to provide launch services for the agency’s Psyche mission. The Psyche mission currently is targeted to launch in July 2022 on a Falcon Heavy rocket from Launch Complex 39A at Cape Canaveral Air Force Station in Florida.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/nasa-logo-web-rgb.jpg?itok=36eU9WU7" length="189751" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-awards-launch-services-contract-for-the-psyche-mission</guid>
+ <pubDate>Fri, 28 Feb 2020 16:00 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458558</dc:identifier>
+</item>
+ <item> <title>Seattle Students to Speak with NASA Astronaut Aboard Space Station</title>
+ <link>http://www.nasa.gov/press-release/seattle-students-to-speak-with-nasa-astronaut-aboard-space-station</link>
+ <description>Students from the greater Seattle area will have an opportunity next week to talk with a NASA astronaut aboard the International Space Station.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/iss061e014144.jpg?itok=pMZIo3w_" length="2109669" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/seattle-students-to-speak-with-nasa-astronaut-aboard-space-station</guid>
+ <pubDate>Fri, 28 Feb 2020 12:56 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458551</dc:identifier>
+</item>
+ <item> <title>NASA, Boeing to Provide Outcome of Starliner Orbital Flight Test Reviews</title>
+ <link>http://www.nasa.gov/press-release/nasa-boeing-to-provide-outcome-of-starliner-orbital-flight-test-reviews</link>
+ <description>NASA and Boeing will host a media teleconference at 11 a.m. EST Friday, March 6, to discuss the outcome of the joint independent review team investigation into the primary issues detected during the company’s uncrewed Orbital Flight Test in December as part of NASA’s Commercial Crew Program.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/49173041263_f12a59f657_k_1.jpg?itok=8fQivuqL" length="353593" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-boeing-to-provide-outcome-of-starliner-orbital-flight-test-reviews</guid>
+ <pubDate>Fri, 28 Feb 2020 11:14 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458548</dc:identifier>
+</item>
+ <item> <title>NASA Selects New Instrument to Continue Key Climate Record</title>
+ <link>http://www.nasa.gov/press-release/nasa-selects-new-instrument-to-continue-key-climate-record</link>
+ <description>NASA has selected a new space-based instrument as an innovative and cost-effective approach to maintaining the 40-year data record of the balance between the solar radiation entering Earth’s atmosphere and the amount absorbed, reflected, and emitted.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/ceres_1.jpg?itok=rkFFWwz-" length="537820" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/nasa-selects-new-instrument-to-continue-key-climate-record</guid>
+ <pubDate>Wed, 26 Feb 2020 16:00 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458497</dc:identifier>
+</item>
+ <item> <title>Florida Students to Speak with NASA Astronaut Aboard Space Station</title>
+ <link>http://www.nasa.gov/press-release/florida-students-to-speak-with-nasa-astronaut-aboard-space-station</link>
+ <description>Florida students will have an opportunity this week to talk with a NASA astronaut aboard the International Space Station.</description>
+ <enclosure url="http://www.nasa.gov/sites/default/files/styles/1x1_cardfeed/public/thumbnails/image/iss062e014335_0.jpg?itok=L1HY0vdl" length="2124074" type="image/jpeg" />
+ <guid isPermaLink="false">http://www.nasa.gov/press-release/florida-students-to-speak-with-nasa-astronaut-aboard-space-station</guid>
+ <pubDate>Tue, 25 Feb 2020 08:49 EST</pubDate>
+ <source url="http://www.nasa.gov/rss/dyn/breaking_news.rss">NASA Breaking News</source>
+ <dc:identifier>458440</dc:identifier>
+</item>
+</channel>
+</rss>
