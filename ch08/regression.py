@@ -4,6 +4,7 @@ Created on Jan 8, 2011
 @author: Peter
 """
 from numpy import *
+from statsmodels import regression
 import matplotlib.pyplot as plt
 from common.util import load_data_set
 
@@ -15,17 +16,30 @@ def stand_regress(x_arr, y_arr):
     if linalg.det(x_tx) == 0.0:
         print("This matrix is singular, cannot do inverse")
         return
-    return x_tx.I * (x_mat.T * y_mat)
+    result = x_tx.I * (x_mat.T * y_mat)
+    # 将matrix转化为ndarray
+    return result.T.A[0]
 
 
-def lwlr(testPoint, xArr, yArr, k=1.0):
-    xMat = mat(xArr)
-    yMat = mat(yArr).T
+def stand_regress_2(x_arr, y_arr):
+    """
+    调用statsmodels api进行线性回归
+    :param x_arr:
+    :param y_arr:
+    :return: 回归参数，类型为ndarray
+    """
+    model = regression.linear_model.OLS(y_arr, x_arr).fit()
+    return model.params
+
+
+def lwlr(testPoint, x_arr, y_arr, k=1.0):
+    xMat = mat(x_arr)
+    yMat = mat(y_arr).T
     m = shape(xMat)[0]
     weights = mat(eye((m)))
     # next 2 lines create weights matrix
     for j in range(m):
-        diffMat = testPoint - xMat[j,:]
+        diffMat = testPoint - xMat[j, :]
         weights[j,j] = exp(diffMat*diffMat.T/(-2.0*k**2))
     xTx = xMat.T * (weights * xMat)
     if linalg.det(xTx) == 0.0:
@@ -53,7 +67,7 @@ def lwlrTestPlot(xArr, yArr, k=1.0):    # same thing as lwlrTest except it sorts
     return yHat,xCopy
 
 
-def rssError(yArr,yHatArr):         # yArr and yHatArr both need to be arrays
+def rssError(yArr,yHatArr):         # y_arr and yHatArr both need to be arrays
     return ((yArr-yHatArr)**2).sum()
 
 
@@ -97,7 +111,7 @@ def stageWise(xArr, yArr, eps=0.01, numIt=100):
     yMean = mean(yMat,0)
     yMat = yMat - yMean         # can also regularize ys but will get smaller coef
     xMat = regularize(xMat)
-    m, n=shape(xMat)
+    m, n = shape(xMat)
     #returnMat = zeros((numIt,n)) #testing code remove
     ws = zeros((n,1)); wsTest = ws.copy(); wsMax = ws.copy()
     for i in range(numIt):
@@ -183,10 +197,12 @@ def setDataCollect(retX, retY):
 def crossValidation(xArr, yArr, numVal=10):
     m = len(yArr)                           
     indexList = range(m)
-    errorMat = zeros((numVal,30))   # create error mat 30columns numVal rows
+    errorMat = zeros((numVal, 30))   # create error mat 30columns numVal rows
     for i in range(numVal):
-        trainX=[]; trainY=[]
-        testX = []; testY = []
+        trainX=[]
+        trainY=[]
+        testX = []
+        testY = []
         random.shuffle(indexList)
         # create training set based on first 90% of values in indexList
         for j in range(m):
@@ -226,19 +242,21 @@ def line_regression_test():
         x_arr, y_arr = load_data_set(r"ex0.txt")
         print(x_arr[0:2])
         ws = stand_regress(x_arr, y_arr)
-        print(ws)
-        x_mat = mat(x_arr)
-        y_mat = mat(y_arr)
+        print("stand_regress result:{}".format(ws))
+        ws2 = stand_regress_2(x_arr, y_arr)
+        print("stand_regress_2 result:{}".format(ws2))
+        x_array = array(x_arr)
+        y_array = array(y_arr)
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.scatter(x_mat[:, 1].flatten().A[0], y_mat.T[:, 0].flatten().A[0])
-        x_copy = x_mat.copy()
-        x_copy.sort(0)
-        y_hat = x_copy * ws
-        ax.plot(x_copy[:, 1], y_hat)
+        ax.scatter(x_array[:, 1], y_array)
+        y_hat = ws2[0] + x_array[:, 1] * ws2[1]
+        print(corrcoef(y_hat, y_arr))
+        ax.plot(x_array[:, 1], y_hat, 'r')
         plt.show()
     except Exception as ex:
         print(ex)
+
 
 if __name__ == '__main__':
     line_regression_test()
