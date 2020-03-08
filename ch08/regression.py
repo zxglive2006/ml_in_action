@@ -91,7 +91,8 @@ def lwlr_array_plot(x_arr, y_arr, k=1.0):
     return y_hat, x_copy
 
 
-def rss_error(y_arr, y_hat_arr):         # y_arr and y_hat_arr both need to be arrays
+def rss_error(y_arr, y_hat_arr):
+    # y_arr and y_hat_arr both need to be arrays
     return ((y_arr - y_hat_arr) ** 2).sum()
 
 
@@ -301,7 +302,33 @@ def lwlr_test():
     plt.show()
 
 
+def abalone_test():
+    """
+    预测鲍鱼的年龄
+    :return:
+    """
+    ab_x, ab_y = load_data_set(r"abalone.txt")
+    print("ab_x shape:{}, ab_y shape:{}".format(shape(ab_x), shape(ab_y)))
+    y_hat_01 = lwlr_array(ab_x[0:99], ab_x[0:99], ab_y[0:99], 0.1)
+    y_hat_1 = lwlr_array(ab_x[0:99], ab_x[0:99], ab_y[0:99], 1)
+    y_hat_10 = lwlr_array(ab_x[0:99], ab_x[0:99], ab_y[0:99], 10)
+    print("训练集，k=0.1, rss_error:{}".format(rss_error(ab_y[0:99], y_hat_01.T)))
+    print("训练集，k=1, rss_error:{}".format(rss_error(ab_y[0:99], y_hat_1.T)))
+    print("训练集，k=10, rss_error:{}".format(rss_error(ab_y[0:99], y_hat_10.T)))
+    # 检验训练集误差
+    y_hat_01 = lwlr_array(ab_x[100:199], ab_x[0:99], ab_y[0:99], 0.1)
+    print("测试集，k=0.1, rss_error:{}".format(rss_error(ab_y[100:199], y_hat_01.T)))
+    y_hat_1 = lwlr_array(ab_x[100:199], ab_x[0:99], ab_y[0:99], 1)
+    print("测试集，k=1, rss_error:{}".format(rss_error(ab_y[100:199], y_hat_1.T)))
+    y_hat_10 = lwlr_array(ab_x[100:199], ab_x[0:99], ab_y[0:99], 10)
+    print("测试集，k=10 rss_error:{}".format(rss_error(ab_y[100:199], y_hat_10.T)))
+    ws = stand_regress(ab_x[0:99], ab_y[0:99])
+    y_hat = mat(ab_x)[100:199] * mat(ws).T
+    print("测试集，简单线性回归 rss_error:{}".format(rss_error(ab_y[100:199], y_hat.T.A[0])))
+
+
 if __name__ == '__main__':
     # line_regression_test()
-    lwlr_test()
+    # lwlr_test()
+    abalone_test()
     print("Run regression finish")
