@@ -32,47 +32,71 @@ def stand_regress_2(x_arr, y_arr):
     return model.params
 
 
-def lwlr(testPoint, x_arr, y_arr, k=1.0):
-    xMat = mat(x_arr)
-    yMat = mat(y_arr).T
-    m = shape(xMat)[0]
-    weights = mat(eye((m)))
+def lwlr(test_point, _x_arr, _y_arr, k=1.0):
+    """
+    局部加权线性回归
+    :param test_point: x空间中的任意一点
+    :param _x_arr:
+    :param _y_arr:
+    :param k:
+    :return: 预测值，是一个数
+    """
+    x_mat = mat(_x_arr)
+    y_mat = mat(_y_arr).T
+    m = shape(x_mat)[0]
+    weights = mat(eye(m))
     # next 2 lines create weights matrix
     for j in range(m):
-        diffMat = testPoint - xMat[j, :]
-        weights[j,j] = exp(diffMat*diffMat.T/(-2.0*k**2))
-    xTx = xMat.T * (weights * xMat)
-    if linalg.det(xTx) == 0.0:
+        diff_mat = test_point - x_mat[j, :]
+        weights[j, j] = exp(diff_mat*diff_mat.T/(-2.0*k**2))
+    x_tx = x_mat.T * (weights * x_mat)
+    if linalg.det(x_tx) == 0.0:
         print("This matrix is singular, cannot do inverse")
         return
-    ws = xTx.I * (xMat.T * (weights * yMat))
-    return testPoint * ws
+    ws = x_tx.I * (x_mat.T * (weights * y_mat))
+    return test_point * ws
 
 
-def lwlrTest(testArr, xArr, yArr, k=1.0):
+def lwlr_array(test_arr, _x_arr, _y_arr, k=1.0):
+    """
+    局部加权线性回归测试
+    :param test_arr:
+    :param _x_arr:
+    :param _y_arr:
+    :param k:
+    :return: 和test_arr相同大小的预测值矩阵
+    """
     # loops over all the data points and applies lwlr to each one
-    m = shape(testArr)[0]
-    yHat = zeros(m)
+    m = shape(test_arr)[0]
+    _y_hat = zeros(m)
     for i in range(m):
-        yHat[i] = lwlr(testArr[i],xArr,yArr,k)
-    return yHat
+        _y_hat[i] = lwlr(test_arr[i], _x_arr, _y_arr, k)
+    return _y_hat
 
 
-def lwlrTestPlot(xArr, yArr, k=1.0):    # same thing as lwlrTest except it sorts X first
-    yHat = zeros(shape(yArr))           # easier for plotting
-    xCopy = mat(xArr)
-    xCopy.sort(0)
-    for i in range(shape(xArr)[0]):
-        yHat[i] = lwlr(xCopy[i],xArr,yArr,k)
-    return yHat,xCopy
+def lwlr_array_plot(x_arr, y_arr, k=1.0):
+    """
+    same thing as lwlr_array except it sorts X first, easier for plotting
+    :param x_arr:
+    :param y_arr:
+    :param k:
+    :return:
+    """
+    y_hat = zeros(shape(y_arr))
+    x_copy = mat(x_arr)
+    x_copy.sort(0)
+    _size = shape(x_arr)[0]
+    for i in range(_size):
+        y_hat[i] = lwlr(x_copy[i], x_arr, y_arr, k)
+    return y_hat, x_copy
 
 
-def rssError(yArr,yHatArr):         # y_arr and yHatArr both need to be arrays
-    return ((yArr-yHatArr)**2).sum()
+def rss_error(y_arr, y_hat_arr):         # y_arr and y_hat_arr both need to be arrays
+    return ((y_arr - y_hat_arr) ** 2).sum()
 
 
 def ridgeRegres(xMat, yMat, lam=0.2):
-    xTx = xMat.T*xMat
+    xTx = xMat.T * xMat
     denom = xTx + eye(shape(xMat)[1])*lam
     if linalg.det(denom) == 0.0:
         print("This matrix is singular, cannot do inverse")
@@ -82,8 +106,9 @@ def ridgeRegres(xMat, yMat, lam=0.2):
 
 
 def ridgeTest(xArr, yArr):
-    xMat = mat(xArr); yMat=mat(yArr).T
-    yMean = mean(yMat,0)
+    xMat = mat(xArr)
+    yMat = mat(yArr).T
+    yMean = mean(yMat, 0)
     yMat = yMat - yMean         # to eliminate X0 take mean off of Y
     # regularize X's
     xMeans = mean(xMat, 0)       # calc mean then subtract it off
@@ -93,14 +118,14 @@ def ridgeTest(xArr, yArr):
     wMat = zeros((numTestPts,shape(xMat)[1]))
     for i in range(numTestPts):
         ws = ridgeRegres(xMat,yMat,exp(i-10))
-        wMat[i,:]=ws.T
+        wMat[i, :] = ws.T
     return wMat
 
 
-def regularize(xMat):           # regularize by columns
+def regularize(xMat):               # regularize by columns
     inMat = xMat.copy()
-    inMeans = mean(inMat, 0)     # calc mean then subtract it off
-    inVar = var(inMat, 0)        # calc variance of Xi then divide by it
+    inMeans = mean(inMat, 0)        # calc mean then subtract it off
+    inVar = var(inMat, 0)           # calc variance of Xi then divide by it
     inMat = (inMat - inMeans)/inVar
     return inMat
 
@@ -112,8 +137,10 @@ def stageWise(xArr, yArr, eps=0.01, numIt=100):
     yMat = yMat - yMean         # can also regularize ys but will get smaller coef
     xMat = regularize(xMat)
     m, n = shape(xMat)
-    #returnMat = zeros((numIt,n)) #testing code remove
-    ws = zeros((n,1)); wsTest = ws.copy(); wsMax = ws.copy()
+    # returnMat = zeros((numIt,n)) #testing code remove
+    ws = zeros((n, 1))
+    wsTest = ws.copy()
+    wsMax = ws.copy()
     for i in range(numIt):
         print(ws.T)
         lowestError = inf
@@ -122,13 +149,14 @@ def stageWise(xArr, yArr, eps=0.01, numIt=100):
                 wsTest = ws.copy()
                 wsTest[j] += eps*sign
                 yTest = xMat*wsTest
-                rssE = rssError(yMat.A,yTest.A)
+                rssE = rss_error(yMat.A, yTest.A)
                 if rssE < lowestError:
                     lowestError = rssE
                     wsMax = wsTest
         ws = wsMax.copy()
         #returnMat[i,:]=ws.T
     #return returnMat
+
 
 #def scrapePage(inFile,outFile,yr,numPce,origPrc):
 #    from BeautifulSoup import BeautifulSoup
@@ -199,8 +227,8 @@ def crossValidation(xArr, yArr, numVal=10):
     indexList = range(m)
     errorMat = zeros((numVal, 30))   # create error mat 30columns numVal rows
     for i in range(numVal):
-        trainX=[]
-        trainY=[]
+        trainX = []
+        trainY = []
         testX = []
         testY = []
         random.shuffle(indexList)
@@ -215,13 +243,13 @@ def crossValidation(xArr, yArr, numVal=10):
         wMat = ridgeTest(trainX,trainY)     # get 30 weight vectors from ridge
         for k in range(30):                 # loop over all of the ridge estimates
             matTestX = mat(testX)
-            matTrainX=mat(trainX)
-            meanTrain = mean(matTrainX,0)
-            varTrain = var(matTrainX,0)
+            matTrainX = mat(trainX)
+            meanTrain = mean(matTrainX, 0)
+            varTrain = var(matTrainX, 0)
             matTestX = (matTestX-meanTrain)/varTrain    # regularize test with training params
-            yEst = matTestX * mat(wMat[k,:]).T + mean(trainY)   # test ridge results and store
-            errorMat[i,k]=rssError(yEst.T.A,array(testY))
-            #print errorMat[i,k]
+            yEst = matTestX * mat(wMat[k, :]).T + mean(trainY)   # test ridge results and store
+            errorMat[i,k]=rss_error(yEst.T.A, array(testY))
+            # print errorMat[i,k]
     meanErrors = mean(errorMat, 0)   # calc avg performance of the different ridge weight vectors
     minMean = float(min(meanErrors))
     bestWeights = wMat[nonzero(meanErrors==minMean)]
@@ -231,7 +259,7 @@ def crossValidation(xArr, yArr, numVal=10):
     xMat = mat(xArr)
     yMat = mat(yArr).T
     meanX = mean(xMat, 0)
-    varX = var(xMat,0)
+    varX = var(xMat, 0)
     unReg = bestWeights/varX
     print("the best model from Ridge Regression is:\n", unReg)
     print("with constant term: ", -1*sum(multiply(meanX, unReg)) + mean(yMat))
@@ -258,6 +286,22 @@ def line_regression_test():
         print(ex)
 
 
+def lwlr_test():
+    x_arr, y_arr = load_data_set(r"ex0.txt")
+    # print(y_arr[0])
+    # print(lwlr(x_arr[0], x_arr, y_arr, 1.0))
+    # print(lwlr(x_arr[0], x_arr, y_arr, 0.001))
+    fig = plt.figure()
+    k_list = [1, 0.1, 0.003]
+    for index in range(3):
+        y_hat, x_sort = lwlr_array_plot(x_arr, y_arr, k_list[index])
+        ax = fig.add_subplot(3, 1, index+1)
+        ax.plot(x_sort[:, 1], y_hat)
+        ax.scatter(mat(x_arr)[:, 1].flatten().A[0], mat(y_arr).T.flatten().A[0], s=2, c='red')
+    plt.show()
+
+
 if __name__ == '__main__':
-    line_regression_test()
+    # line_regression_test()
+    lwlr_test()
     print("Run regression finish")
