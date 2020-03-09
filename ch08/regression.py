@@ -117,7 +117,8 @@ def ridge_test(x_arr, y_arr):
     x_var = var(x_mat, 0)          # calc variance of Xi then divide by it
     x_mat = (x_mat - x_means)/x_var
     num_test_pts = 30
-    w_mat = zeros((num_test_pts, shape(x_mat)[1]))
+    num_feat_count = shape(x_mat)[1]
+    w_mat = zeros((num_test_pts, num_feat_count))
     for i in range(num_test_pts):
         ws = ridge_regression(x_mat, y_mat, exp(i - 10))
         w_mat[i, :] = ws.T
