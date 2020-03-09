@@ -3,10 +3,14 @@
 Created on Jan 8, 2011
 @author: Peter
 """
-from numpy import *
+from numpy import array, linalg, mat, shape, eye, zeros,\
+    inf, exp, mean, var, random, nonzero, multiply, corrcoef
 from statsmodels import regression
 import matplotlib.pyplot as plt
 from common.util import load_data_set
+from time import sleep
+import json
+import urllib.request
 
 
 def stand_regress(x_arr, y_arr):
@@ -125,7 +129,8 @@ def ridge_test(x_arr, y_arr):
     return w_mat
 
 
-def regularize(x_mat):                  # regularize by columns
+def regularize(x_mat):
+    # regularize by columns
     in_mat = x_mat.copy()
     in_means = mean(in_mat, 0)          # calc mean then subtract it off
     in_var = var(in_mat, 0)             # calc variance of Xi then divide by it
@@ -140,25 +145,24 @@ def stage_wise(x_arr, y_arr, eps=0.01, num_it=100):
     y_mat = y_mat - y_mean         # can also regularize ys but will get smaller coef
     x_mat = regularize(x_mat)
     m, n = shape(x_mat)
-    # returnMat = zeros((num_it,n)) #testing code remove
+    return_mat = zeros((num_it, n))  # testing code remove
     ws = zeros((n, 1))
-    wsTest = ws.copy()
-    wsMax = ws.copy()
+    ws_max = ws.copy()
     for i in range(num_it):
-        print(ws.T)
-        lowestError = inf
+        # print(ws.T)
+        lowest_error = inf  # numpy中用来表示正无穷大
         for j in range(n):
             for sign in [-1, 1]:
-                wsTest = ws.copy()
-                wsTest[j] += eps*sign
-                yTest = x_mat*wsTest
-                rssE = rss_error(y_mat.A, yTest.A)
-                if rssE < lowestError:
-                    lowestError = rssE
-                    wsMax = wsTest
-        ws = wsMax.copy()
-        #returnMat[i,:]=ws.T
-    #return returnMat
+                ws_test = ws.copy()
+                ws_test[j] += eps*sign
+                y_test = x_mat * ws_test
+                rss_e = rss_error(y_mat.A, y_test.A)
+                if rss_e < lowest_error:
+                    lowest_error = rss_e
+                    ws_max = ws_test
+        ws = ws_max.copy()
+        return_mat[i, :] = ws.T
+    return return_mat
 
 
 #def scrapePage(inFile,outFile,yr,numPce,origPrc):
@@ -190,9 +194,7 @@ def stage_wise(x_arr, y_arr, eps=0.01, num_it=100):
 #        currentRow = soup.findAll('table', r="%d" % i)
 #    fw.close()
     
-from time import sleep
-import json
-import urllib.request
+
 def searchForSet(retX, retY, setNum, yr, numPce, origPrc):
     sleep(10)
     myAPIstr = 'AIzaSyD2cR2KFyx12hXu6PFU-wrWot3NXvko8vY'
@@ -204,11 +206,12 @@ def searchForSet(retX, retY, setNum, yr, numPce, origPrc):
             currItem = retDict['items'][i]
             if currItem['product']['condition'] == 'new':
                 newFlag = 1
-            else: newFlag = 0
+            else:
+                newFlag = 0
             listOfInv = currItem['product']['inventories']
             for item in listOfInv:
                 sellingPrice = item['price']
-                if  sellingPrice > origPrc * 0.5:
+                if sellingPrice > origPrc * 0.5:
                     print("%d\t%d\t%d\t%f\t%f" % (yr,numPce,newFlag,origPrc, sellingPrice))
                     retX.append([yr, numPce, newFlag, origPrc])
                     retY.append(sellingPrice)
@@ -251,7 +254,7 @@ def crossValidation(xArr, yArr, numVal=10):
             varTrain = var(matTrainX, 0)
             matTestX = (matTestX-meanTrain)/varTrain    # regularize test with training params
             yEst = matTestX * mat(wMat[k, :]).T + mean(trainY)   # test ridge results and store
-            errorMat[i,k]=rss_error(yEst.T.A, array(testY))
+            errorMat[i, k]=rss_error(yEst.T.A, array(testY))
             # print errorMat[i,k]
     meanErrors = mean(errorMat, 0)   # calc avg performance of the different ridge weight vectors
     minMean = float(min(meanErrors))
@@ -339,8 +342,27 @@ def ridge_plot_test():
     plt.show()
 
 
+def stage_test():
+    ab_x, ab_y = load_data_set(r"abalone.txt")
+    weights = stage_wise(ab_x, ab_y, 0.01, 200)
+    print("前向线性回归，eps:{}, num_it:{}".format(0.01, 200))
+    print(weights[-1])
+    weights = stage_wise(ab_x, ab_y, 0.001, 5000)
+    print("前向线性回归，eps:{}, num_it:{}".format(0.001, 5000))
+    print(weights[-1])
+    x_mat = mat(ab_x)
+    y_mat = mat(ab_y).T
+    x_mat = regularize(x_mat)
+    y_mean = mean(y_mat, 0)
+    y_mat = y_mat - y_mean
+    weights = stand_regress(x_mat, y_mat.T)
+    print("标准线性回归")
+    print(weights)
+
+
 if __name__ == '__main__':
     # line_regression_test()
     # lwlr_test()
-    ridge_plot_test()
+    # ridge_plot_test()
+    stage_test()
     print("Run regression finish")
