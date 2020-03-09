@@ -96,61 +96,62 @@ def rss_error(y_arr, y_hat_arr):
     return ((y_arr - y_hat_arr) ** 2).sum()
 
 
-def ridgeRegres(xMat, yMat, lam=0.2):
-    xTx = xMat.T * xMat
-    denom = xTx + eye(shape(xMat)[1])*lam
+def ridge_regression(x_mat, y_mat, lam=0.2):
+    x_tx = x_mat.T * x_mat
+    _size = shape(x_mat)[1]
+    denom = x_tx + eye(_size) * lam
     if linalg.det(denom) == 0.0:
         print("This matrix is singular, cannot do inverse")
         return
-    ws = denom.I * (xMat.T*yMat)
+    ws = denom.I * (x_mat.T * y_mat)
     return ws
 
 
-def ridgeTest(xArr, yArr):
-    xMat = mat(xArr)
-    yMat = mat(yArr).T
-    yMean = mean(yMat, 0)
-    yMat = yMat - yMean         # to eliminate X0 take mean off of Y
+def ridge_test(x_arr, y_arr):
+    x_mat = mat(x_arr)
+    y_mat = mat(y_arr).T
+    y_mean = mean(y_mat, 0)
+    y_mat = y_mat - y_mean         # to eliminate X0 take mean off of Y
     # regularize X's
-    xMeans = mean(xMat, 0)       # calc mean then subtract it off
-    xVar = var(xMat, 0)          # calc variance of Xi then divide by it
-    xMat = (xMat - xMeans)/xVar
-    numTestPts = 30
-    wMat = zeros((numTestPts,shape(xMat)[1]))
-    for i in range(numTestPts):
-        ws = ridgeRegres(xMat,yMat,exp(i-10))
-        wMat[i, :] = ws.T
-    return wMat
+    x_means = mean(x_mat, 0)       # calc mean then subtract it off
+    x_var = var(x_mat, 0)          # calc variance of Xi then divide by it
+    x_mat = (x_mat - x_means)/x_var
+    num_test_pts = 30
+    w_mat = zeros((num_test_pts, shape(x_mat)[1]))
+    for i in range(num_test_pts):
+        ws = ridge_regression(x_mat, y_mat, exp(i - 10))
+        w_mat[i, :] = ws.T
+    return w_mat
 
 
-def regularize(xMat):               # regularize by columns
-    inMat = xMat.copy()
-    inMeans = mean(inMat, 0)        # calc mean then subtract it off
-    inVar = var(inMat, 0)           # calc variance of Xi then divide by it
-    inMat = (inMat - inMeans)/inVar
-    return inMat
+def regularize(x_mat):                  # regularize by columns
+    in_mat = x_mat.copy()
+    in_means = mean(in_mat, 0)          # calc mean then subtract it off
+    in_var = var(in_mat, 0)             # calc variance of Xi then divide by it
+    in_mat = (in_mat - in_means)/in_var
+    return in_mat
 
 
-def stageWise(xArr, yArr, eps=0.01, numIt=100):
-    xMat = mat(xArr)
-    yMat=mat(yArr).T
-    yMean = mean(yMat,0)
-    yMat = yMat - yMean         # can also regularize ys but will get smaller coef
-    xMat = regularize(xMat)
-    m, n = shape(xMat)
-    # returnMat = zeros((numIt,n)) #testing code remove
+def stage_wise(x_arr, y_arr, eps=0.01, num_it=100):
+    x_mat = mat(x_arr)
+    y_mat = mat(y_arr).T
+    y_mean = mean(y_mat, 0)
+    y_mat = y_mat - y_mean         # can also regularize ys but will get smaller coef
+    x_mat = regularize(x_mat)
+    m, n = shape(x_mat)
+    # returnMat = zeros((num_it,n)) #testing code remove
     ws = zeros((n, 1))
     wsTest = ws.copy()
     wsMax = ws.copy()
-    for i in range(numIt):
+    for i in range(num_it):
         print(ws.T)
         lowestError = inf
         for j in range(n):
-            for sign in [-1,1]:
+            for sign in [-1, 1]:
                 wsTest = ws.copy()
                 wsTest[j] += eps*sign
-                yTest = xMat*wsTest
-                rssE = rss_error(yMat.A, yTest.A)
+                yTest = x_mat*wsTest
+                rssE = rss_error(y_mat.A, yTest.A)
                 if rssE < lowestError:
                     lowestError = rssE
                     wsMax = wsTest
@@ -241,7 +242,7 @@ def crossValidation(xArr, yArr, numVal=10):
             else:
                 testX.append(xArr[indexList[j]])
                 testY.append(yArr[indexList[j]])
-        wMat = ridgeTest(trainX,trainY)     # get 30 weight vectors from ridge
+        wMat = ridge_test(trainX, trainY)     # get 30 weight vectors from ridge
         for k in range(30):                 # loop over all of the ridge estimates
             matTestX = mat(testX)
             matTrainX = mat(trainX)
@@ -327,8 +328,18 @@ def abalone_test():
     print("测试集，简单线性回归 rss_error:{}".format(rss_error(ab_y[100:199], y_hat.T.A[0])))
 
 
+def ridge_plot_test():
+    ab_x, ab_y = load_data_set(r"abalone.txt")
+    ridge_weights = ridge_test(ab_x, ab_y)
+    print(ridge_weights)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(ridge_weights)
+    plt.show()
+
+
 if __name__ == '__main__':
     # line_regression_test()
     # lwlr_test()
-    abalone_test()
+    ridge_plot_test()
     print("Run regression finish")
