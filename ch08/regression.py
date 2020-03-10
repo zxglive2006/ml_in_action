@@ -3,14 +3,12 @@
 Created on Jan 8, 2011
 @author: Peter
 """
-from numpy import array, linalg, mat, shape, eye, zeros,\
+from numpy import array, linalg, mat, shape, eye, zeros, ones, \
     inf, exp, mean, var, random, nonzero, multiply, corrcoef
 from statsmodels import regression
 import matplotlib.pyplot as plt
+from bs4 import BeautifulSoup
 from common.util import load_data_set
-from time import sleep
-import json
-import urllib.request
 
 
 def stand_regress(x_arr, y_arr):
@@ -165,110 +163,87 @@ def stage_wise(x_arr, y_arr, eps=0.01, num_it=100):
     return return_mat
 
 
-#def scrapePage(inFile,outFile,yr,numPce,origPrc):
-#    from BeautifulSoup import BeautifulSoup
-#    fr = open(inFile); fw=open(outFile,'a') #a is append mode writing
-#    soup = BeautifulSoup(fr.read())
-#    i=1
-#    currentRow = soup.findAll('table', r="%d" % i)
-#    while(len(currentRow)!=0):
-#        title = currentRow[0].findAll('a')[1].text
-#        lwrTitle = title.lower()
-#        if (lwrTitle.find('new') > -1) or (lwrTitle.find('nisb') > -1):
-#            newFlag = 1.0
-#        else:
-#            newFlag = 0.0
-#        soldUnicde = currentRow[0].findAll('td')[3].findAll('span')
-#        if len(soldUnicde)==0:
-#            print "item #%d did not sell" % i
-#        else:
-#            soldPrice = currentRow[0].findAll('td')[4]
-#            priceStr = soldPrice.text
-#            priceStr = priceStr.replace('$','') #strips out $
-#            priceStr = priceStr.replace(',','') #strips out ,
-#            if len(soldPrice)>1:
-#                priceStr = priceStr.replace('Free shipping', '') #strips out Free Shipping
-#            print "%s\t%d\t%s" % (priceStr,newFlag,title)
-#            fw.write("%d\t%d\t%d\t%f\t%s\n" % (yr,numPce,newFlag,origPrc,priceStr))
-#        i += 1
-#        currentRow = soup.findAll('table', r="%d" % i)
-#    fw.close()
-    
-
-def searchForSet(retX, retY, setNum, yr, numPce, origPrc):
-    sleep(10)
-    myAPIstr = 'AIzaSyD2cR2KFyx12hXu6PFU-wrWot3NXvko8vY'
-    searchURL = 'https://www.googleapis.com/shopping/search/v1/public/products?key=%s&country=US&q=lego+%d&alt=json' % (myAPIstr, setNum)
-    pg = urllib.request.urlopen(searchURL)
-    retDict = json.loads(pg.read())
-    for i in range(len(retDict['items'])):
-        try:
-            currItem = retDict['items'][i]
-            if currItem['product']['condition'] == 'new':
-                newFlag = 1
-            else:
-                newFlag = 0
-            listOfInv = currItem['product']['inventories']
-            for item in listOfInv:
-                sellingPrice = item['price']
-                if sellingPrice > origPrc * 0.5:
-                    print("%d\t%d\t%d\t%f\t%f" % (yr,numPce,newFlag,origPrc, sellingPrice))
-                    retX.append([yr, numPce, newFlag, origPrc])
-                    retY.append(sellingPrice)
-        except:
-            print('problem with item %d' % i)
+def scrape_page(in_file, year, num_pieces, original_price):
+    """
+    通过解析本地html文件获取乐高玩具销售数据
+    :param in_file: 本地html文件
+    :param year:
+    :param num_pieces:
+    :param original_price:
+    :return:
+    """
+    lego_x = []
+    lego_y = []
+    fr = open(in_file, 'r', encoding='utf-8')
+    soup = BeautifulSoup(fr.read(), "lxml")
+    i = 1
+    current_row = soup.findAll('table', r="%d" % i)
+    while len(current_row) != 0:
+        title = current_row[0].findAll('a')[1].text
+        lwr_title = title.lower()
+        if (lwr_title.find('new') > -1) or (lwr_title.find('nisb') > -1):
+            new_flag = 1.0
+        else:
+            new_flag = 0.0
+        sold_span = current_row[0].findAll('td')[3].findAll('span')
+        if len(sold_span) > 0:
+            sold_price = current_row[0].findAll('td')[4]
+            price_str = sold_price.text
+            price_str = price_str.replace('$', '')     # strips out $
+            price_str = price_str.replace(',', '')      # strips out ,
+            if len(sold_price) > 1:
+                price_str = price_str.replace('Free shipping', '')    # strips out Free Shipping
+            lego_x.append([year, num_pieces, new_flag, original_price])
+            lego_y.append(float(price_str))
+        i += 1
+        current_row = soup.findAll('table', r="%d" % i)
+    fr.close()
+    return lego_x, lego_y
 
 
-def setDataCollect(retX, retY):
-    searchForSet(retX, retY, 8288, 2006, 800, 49.99)
-    searchForSet(retX, retY, 10030, 2002, 3096, 269.99)
-    searchForSet(retX, retY, 10179, 2007, 5195, 499.99)
-    searchForSet(retX, retY, 10181, 2007, 3428, 199.99)
-    searchForSet(retX, retY, 10189, 2008, 5922, 299.99)
-    searchForSet(retX, retY, 10196, 2009, 3263, 249.99)
-
-
-def crossValidation(xArr, yArr, numVal=10):
-    m = len(yArr)                           
-    indexList = range(m)
-    errorMat = zeros((numVal, 30))   # create error mat 30columns numVal rows
-    for i in range(numVal):
-        trainX = []
-        trainY = []
-        testX = []
-        testY = []
-        random.shuffle(indexList)
+def cross_validation(x_arr, y_arr, num_val=10):
+    """
+    交叉验证
+    :param x_arr:
+    :param y_arr:
+    :param num_val: 交叉验证的次数
+    :return:
+    """
+    m = len(y_arr)
+    index_list = list(range(m))
+    error_mat = zeros((num_val, 30))   # create error mat 30columns num_val rows
+    for i in range(num_val):
+        train_x, train_y = [], []
+        test_x, test_y = [], []
+        random.shuffle(index_list)
         # create training set based on first 90% of values in indexList
         for j in range(m):
             if j < m*0.9: 
-                trainX.append(xArr[indexList[j]])
-                trainY.append(yArr[indexList[j]])
+                train_x.append(x_arr[index_list[j]])
+                train_y.append(y_arr[index_list[j]])
             else:
-                testX.append(xArr[indexList[j]])
-                testY.append(yArr[indexList[j]])
-        wMat = ridge_test(trainX, trainY)     # get 30 weight vectors from ridge
-        for k in range(30):                 # loop over all of the ridge estimates
-            matTestX = mat(testX)
-            matTrainX = mat(trainX)
-            meanTrain = mean(matTrainX, 0)
-            varTrain = var(matTrainX, 0)
-            matTestX = (matTestX-meanTrain)/varTrain    # regularize test with training params
-            yEst = matTestX * mat(wMat[k, :]).T + mean(trainY)   # test ridge results and store
-            errorMat[i, k]=rss_error(yEst.T.A, array(testY))
+                test_x.append(x_arr[index_list[j]])
+                test_y.append(y_arr[index_list[j]])
+        w_mat = ridge_test(train_x, train_y)        # get 30 weight vectors from ridge
+        for k in range(30):                         # loop over all of the ridge estimates
+            mat_test_x, mat_train_x = mat(test_x), mat(train_x)
+            mean_train = mean(mat_train_x, 0)
+            var_train = var(mat_train_x, 0)
+            mat_test_x = (mat_test_x-mean_train)/var_train    # regularize test with training params
+            y_est = mat_test_x * mat(w_mat[k, :]).T + mean(train_y)   # test ridge results and store
+            error_mat[i, k] = rss_error(y_est.T.A, array(test_y))
             # print errorMat[i,k]
-    meanErrors = mean(errorMat, 0)   # calc avg performance of the different ridge weight vectors
-    minMean = float(min(meanErrors))
-    bestWeights = wMat[nonzero(meanErrors==minMean)]
+    mean_errors = mean(error_mat, 0)   # calc avg performance of the different ridge weight vectors
+    min_mean = float(min(mean_errors))
+    best_weights = w_mat[nonzero(mean_errors == min_mean)]
     # can unregularize to get model
     # when we regularized we wrote Xreg = (x-meanX)/var(x)
-    # we can now write in terms of x not Xreg:  x*w/var(x) - meanX/var(x) +meanY
-    xMat = mat(xArr)
-    yMat = mat(yArr).T
-    meanX = mean(xMat, 0)
-    varX = var(xMat, 0)
-    unReg = bestWeights/varX
-    print("the best model from Ridge Regression is:\n", unReg)
-    print("with constant term: ", -1*sum(multiply(meanX, unReg)) + mean(yMat))
+    # we can now write in terms of x not Xreg: x*w/var(x) - meanX/var(x) +meanY
+    x_mat, y_mat = mat(x_arr), mat(y_arr).T
+    mean_x, var_x = mean(x_mat, 0), var(x_mat, 0)
+    un_reg = best_weights/var_x
+    print("the best model from Ridge Regression is:", un_reg)
+    print("with constant term: ", -1*sum(multiply(mean_x, un_reg)) + mean(y_mat))
 
 
 def line_regression_test():
@@ -360,9 +335,44 @@ def stage_test():
     print(weights)
 
 
+def lego_test():
+    lg_x = []
+    lg_y = []
+    template = r"setHtml/lego{}.html"
+    print_template = "scrape page lego{}.html finish, size:{}"
+    data = (
+        ("8288", 2006, 800, 49.99),
+        ("10030", 2002, 3096, 269.99),
+        ("10179", 2007, 5195, 499.99),
+        ("10181", 2007, 3428, 199.99),
+        ("10189", 2008, 5922, 299.99),
+        ("10196", 2009, 3263, 249.99)
+    )
+    for index in range(len(data)):
+        result = scrape_page(
+            template.format(data[index][0]), data[index][1], data[index][2], data[index][3])
+        print(print_template.format(data[index][0], len(result[0])))
+        lg_x.extend(result[0])
+        lg_y.extend(result[1])
+    print("lg_x shape:{}".format(shape(lg_x)))
+    print("lg_y shape:{}".format(shape(lg_y)))
+    size = shape(lg_y)[0]
+    lg_x1 = mat(ones((size, 5)))
+    print("lg_x[0]:{}".format(lg_x[0]))
+    lg_x1[:, 1:5] = mat(lg_x)
+    print("lg_x1[0]:{}".format(lg_x1[0]))
+    ws = mat(stand_regress(lg_x1, mat(lg_y)))
+    print("ws:{}".format(ws.A[0]))
+    print("lg_x1[0] * ws:{}, lg_y[0]:{}".format(round((lg_x1[0]*ws.T).A[0][0], 2), lg_y[0]))
+    print("lg_x1[-1] * ws:{}, lg_y[0]:{}".format(round((lg_x1[-1]*ws.T).A[0][0], 2), lg_y[-1]))
+    print("lg_x1[43] * ws:{}, lg_y[0]:{}".format(round((lg_x1[43]*ws.T).A[0][0], 2), lg_y[43]))
+    cross_validation(lg_x, lg_y, 10)
+
+
 if __name__ == '__main__':
     # line_regression_test()
     # lwlr_test()
     # ridge_plot_test()
-    stage_test()
+    # stage_test()
+    lego_test()
     print("Run regression finish")
