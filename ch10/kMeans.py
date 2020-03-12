@@ -6,6 +6,9 @@ k Means Clustering for Ch10 of Machine Learning in Action
 """
 from numpy import *
 import matplotlib.pyplot as plt
+import urllib
+import json
+from time import sleep
 
 
 def load_data_set(file_name):           # general function to parse tab -delimited floats
@@ -61,38 +64,42 @@ def k_means(data_set, k, dist_meas=dist_euler, create_cent=rand_cent):
     return centroids, cluster_assessment
 
 
-def biKmeans(dataSet, k, distMeas=dist_euler):
-    m = shape(dataSet)[0]
-    clusterAssment = mat(zeros((m,2)))
-    centroid0 = mean(dataSet, axis=0).tolist()[0]
-    centList =[centroid0]       # create a list with one centroid
-    for j in range(m):          # calc initial Error
-        clusterAssment[j, 1] = distMeas(mat(centroid0), dataSet[j,:])**2
-    while len(centList) < k:
-        lowestSSE = inf
-        for i in range(len(centList)):
+def bisect_kmeans(data_set, k, dist_meas=dist_euler):
+    m = shape(data_set)[0]
+    cluster_assessment = mat(zeros((m, 2)))
+    centroid0 = mean(data_set, axis=0).tolist()[0]
+    cent_list = [centroid0]             # create a list with one centroid
+    for j in range(m):                  # calc initial Error
+        cluster_assessment[j, 1] = dist_meas(mat(centroid0), data_set[j, :]) ** 2
+    best_cluster_ass = inf
+    while len(cent_list) < k:
+        lowest_sse = inf
+        for i in range(len(cent_list)):
             # get the data points currently in cluster i
-            ptsInCurrCluster = dataSet[nonzero(clusterAssment[:, 0].A == i)[0], :]
-            centroidMat, splitClustAss = k_means(ptsInCurrCluster, 2, distMeas)
-            sseSplit = sum(splitClustAss[:,1])      # compare the SSE to the current minimum
-            sseNotSplit = sum(clusterAssment[nonzero(clusterAssment[:,0].A != i)[0], 1])
-            print("sseSplit, and notSplit: ", sseSplit, sseNotSplit)
-            if (sseSplit + sseNotSplit) < lowestSSE:
-                bestCentToSplit = i
-                bestNewCents = centroidMat
-                bestClustAss = splitClustAss.copy()
-                lowestSSE = sseSplit + sseNotSplit
-        bestClustAss[nonzero(bestClustAss[:,0].A == 1)[0],0] = len(centList) #change 1 to 3,4, or whatever
-        bestClustAss[nonzero(bestClustAss[:,0].A == 0)[0],0] = bestCentToSplit
-        print('the bestCentToSplit is: ',bestCentToSplit)
-        print('the len of bestClustAss is: ', len(bestClustAss))
-        centList[bestCentToSplit] = bestNewCents[0,:].tolist()[0]#replace a centroid with two best centroids 
-        centList.append(bestNewCents[1,:].tolist()[0])
-        clusterAssment[nonzero(clusterAssment[:,0].A == bestCentToSplit)[0],:]= bestClustAss#reassign new clusters, and SSE
-    return mat(centList), clusterAssment
+            pts_in_curr_cluster = data_set[nonzero(cluster_assessment[:, 0].A == i)[0], :]
+            centroid_mat, split_cluster_ass = k_means(pts_in_curr_cluster, 2, dist_meas)
+            sse_split = sum(split_cluster_ass[:, 1])      # compare the SSE to the current minimum
+            sse_not_split = sum(cluster_assessment[nonzero(cluster_assessment[:, 0].A != i)[0], 1])
+            print("sseSplit:{} and notSplit: {}".format(sse_split, sse_not_split))
+            if sse_split + sse_not_split < lowest_sse:
+                best_cent_to_split = i
+                best_new_cents = centroid_mat
+                best_cluster_ass = split_cluster_ass.copy()
+                lowest_sse = sse_split + sse_not_split
+        # change 1 to 3,4, or whatever
+        best_cluster_ass[nonzero(best_cluster_ass[:, 0].A == 1)[0], 0] = len(cent_list)
+        best_cluster_ass[nonzero(best_cluster_ass[:, 0].A == 0)[0], 0] = best_cent_to_split
+        print('the bestCentToSplit is: ', best_cent_to_split)
+        print('the len of best_cluster_ass is: ', len(best_cluster_ass))
+        # replace a centroid with two best centroids
+        cent_list[best_cent_to_split] = best_new_cents[0, :].tolist()[0]
+        cent_list.append(best_new_cents[1, :].tolist()[0])
+        # reassign new clusters, and SSE
+        cluster_assessment[
+            nonzero(cluster_assessment[:, 0].A == best_cent_to_split)[0], :] = best_cluster_ass
+    return mat(cent_list), cluster_assessment
 
-import urllib
-import json
+
 def geoGrab(stAddress, city):
     apiStem = 'http://where.yahooapis.com/geocode?'  # create a dict and constants for the goecoder
     params = {}
@@ -105,7 +112,7 @@ def geoGrab(stAddress, city):
     c=urllib.urlopen(yahooApi)
     return json.loads(c.read())
 
-from time import sleep
+
 def massPlaceFind(fileName):
     fw = open('places.txt', 'w')
     for line in open(fileName).readlines():
@@ -123,7 +130,8 @@ def massPlaceFind(fileName):
     fw.close()
 
 
-def distSLC(vecA, vecB):    # Spherical Law of Cosines
+def distSLC(vecA, vecB):
+    # Spherical Law of Cosines
     a = sin(vecA[0, 1]*pi/180)*sin(vecB[0, 1]*pi/180)
     b = cos(vecA[0, 1]*pi/180)*cos(vecB[0, 1]*pi/180)*cos(pi*(vecB[0, 0]-vecA[0, 0])/180)
     return arccos(a + b)*6371.0     # pi is imported with numpy
@@ -135,9 +143,9 @@ def clusterClubs(numClust=5):
         lineArr = line.split('\t')
         datList.append([float(lineArr[4]), float(lineArr[3])])
     datMat = mat(datList)
-    myCentroids, clustAssing = biKmeans(datMat, numClust, distMeas=distSLC)
+    myCentroids, clustAssing = bisect_kmeans(datMat, numClust, dist_meas=distSLC)
     fig = plt.figure()
-    rect = [0.1,0.1,0.8,0.8]
+    rect = [0.1, 0.1, 0.8, 0.8]
     scatterMarkers = ['s', 'o', '^', '8', 'p', 'd', 'v', 'h', '>', '<']
     axprops = dict(xticks=[], yticks=[])
     ax0 = fig.add_axes(rect, label='ax0', **axprops)
@@ -145,11 +153,10 @@ def clusterClubs(numClust=5):
     ax0.imshow(imgP)
     ax1 = fig.add_axes(rect, label='ax1', frameon=False)
     for i in range(numClust):
-        ptsInCurrCluster = datMat[nonzero(clustAssing[:,0].A==i)[0],:]
+        ptsInCurrCluster = datMat[nonzero(clustAssing[:,0].A == i)[0],:]
         markerStyle = scatterMarkers[i % len(scatterMarkers)]
         ax1.scatter(
-            ptsInCurrCluster[:, 0].flatten().A[0],
-            ptsInCurrCluster[:, 1].flatten().A[0],
+            ptsInCurrCluster[:, 0].flatten().A[0], ptsInCurrCluster[:, 1].flatten().A[0],
             marker=markerStyle, s=90)
     ax1.scatter(myCentroids[:, 0].flatten().A[0], myCentroids[:, 1].flatten().A[0], marker='+', s=300)
     plt.show()
@@ -168,6 +175,16 @@ def kmeans_test():
     print("my_cluster:{}".format(my_cluster))
 
 
+def bisect_kmeans_test():
+    data_mat = mat(load_data_set("testSet2.txt"))
+    cent_list, my_new_assessment = bisect_kmeans(data_mat, 3)
+    print("cent_list:")
+    print(cent_list)
+    print("my_new_assessment")
+    print(my_new_assessment)
+
+
 if __name__ == '__main__':
-    kmeans_test()
+    # kmeans_test()
+    bisect_kmeans_test()
     print("Run kmeans finish")
