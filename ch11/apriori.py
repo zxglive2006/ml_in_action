@@ -11,39 +11,51 @@ def load_data_set():
     return [[1, 3, 4], [2, 3, 5], [1, 2, 3, 5], [2, 5]]
 
 
-def createC1(dataSet):
-    C1 = []
-    for transaction in dataSet:
+def create_c1(data_set):
+    """
+    构建集合C1,C1是大小为1的所有候选项集的集合
+    :param data_set:
+    :return:
+    """
+    c1 = []
+    for transaction in data_set:
         for item in transaction:
-            if not [item] in C1:
-                C1.append([item])
-    C1.sort()
+            if not [item] in c1:
+                c1.append([item])
+    c1.sort()
     # use frozen set so we can use it as a key in a dict
-    return map(frozenset, C1)
+    return list(map(frozenset, c1))
 
 
-def scanD(D, Ck, minSupport):
-    ssCnt = {}
-    for tid in D:
-        for can in Ck:
+def scan_d(data_set, c_k, min_support):
+    """
+    从Ck生成Lk
+    :param data_set: 数据集
+    :param c_k: 候选项集列表
+    :param min_support: 感兴趣项集的最小支持度
+    :return: 包含支持度值的列表
+    """
+    ss_cnt = {}
+    for tid in data_set:
+        for can in c_k:
             if can.issubset(tid):
-                if not can in ssCnt:
-                    ssCnt[can]=1
+                if can not in ss_cnt:
+                    ss_cnt[can] = 1
                 else:
-                    ssCnt[can] += 1
-    numItems = float(len(D))
-    retList = []
-    supportData = {}
-    for key in ssCnt:
-        support = ssCnt[key]/numItems
-        if support >= minSupport:
-            retList.insert(0,key)
-        supportData[key] = support
-    return retList, supportData
+                    ss_cnt[can] += 1
+    num_items = float(len(data_set))
+    ret_list = []
+    support_data = {}
+    for _key in ss_cnt:
+        support = ss_cnt[_key]/num_items
+        if support >= min_support:
+            ret_list.insert(0, _key)
+        support_data[_key] = support
+    return ret_list, support_data
 
 
 def aprioriGen(Lk, k):
-    # creates Ck
+    # creates c_k
     retList = []
     lenLk = len(Lk)
     for i in range(lenLk):
@@ -56,15 +68,15 @@ def aprioriGen(Lk, k):
 
 
 def apriori(dataSet, minSupport=0.5):
-    C1 = createC1(dataSet)
+    C1 = create_c1(dataSet)
     D = map(set, dataSet)
-    L1, supportData = scanD(D, C1, minSupport)
+    L1, supportData = scan_d(D, C1, minSupport)
     L = [L1]
     k = 2
     while len(L[k-2]) > 0:
         Ck = aprioriGen(L[k-2], k)
         # scan DB to get Lk
-        Lk, supK = scanD(D, Ck, minSupport)
+        Lk, supK = scan_d(D, Ck, minSupport)
         supportData.update(supK)
         L.append(Lk)
         k += 1
@@ -166,5 +178,17 @@ from time import sleep
 #     return transDict, itemMeaning
 
 
+def apriori_test():
+    my_data_set = load_data_set()
+    print(my_data_set)
+    my_c1 = create_c1(my_data_set)
+    print(my_c1)
+    d = list(map(set, my_data_set))
+    print(d)
+    l1, support_data0 = scan_d(d, my_c1, 0.5)
+    print(l1)
+
+
 if __name__ == '__main__':
+    apriori_test()
     print("Run apriori finish")

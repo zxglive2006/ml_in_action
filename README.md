@@ -3,3 +3,5 @@
 
 ### 需要安装的包：
 ##### pip install feedparser
+
+#### https://github.com/votesmart/python-votesmart
