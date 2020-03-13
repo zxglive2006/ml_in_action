@@ -6,9 +6,6 @@ k Means Clustering for Ch10 of Machine Learning in Action
 """
 from numpy import *
 import matplotlib.pyplot as plt
-import urllib
-import json
-from time import sleep
 
 
 def load_data_set(file_name):           # general function to parse tab -delimited floats
@@ -22,7 +19,7 @@ def load_data_set(file_name):           # general function to parse tab -delimit
 
 
 def dist_euler(vec_a, vec_b):
-    return sqrt(sum(power(vec_a - vec_b, 2)))     # la.norm(vecA-vecB)
+    return sqrt(sum(power(vec_a - vec_b, 2)))     # la.norm(vec_a-vec_b)
 
 
 def rand_cent(data_set, k):
@@ -100,65 +97,41 @@ def bisect_kmeans(data_set, k, dist_meas=dist_euler):
     return mat(cent_list), cluster_assessment
 
 
-def geoGrab(stAddress, city):
-    apiStem = 'http://where.yahooapis.com/geocode?'  # create a dict and constants for the goecoder
-    params = {}
-    params['flags'] = 'J'                   # JSON return type
-    params['appid'] = 'aaa0VN6k'
-    params['location'] = '%s %s' % (stAddress, city)
-    url_params = urllib.urlencode(params)
-    yahooApi = apiStem + url_params     # print url_params
-    print(yahooApi)
-    c=urllib.urlopen(yahooApi)
-    return json.loads(c.read())
-
-
-def massPlaceFind(fileName):
-    fw = open('places.txt', 'w')
-    for line in open(fileName).readlines():
-        line = line.strip()
-        lineArr = line.split('\t')
-        retDict = geoGrab(lineArr[1], lineArr[2])
-        if retDict['ResultSet']['Error'] == 0:
-            lat = float(retDict['ResultSet']['Results'][0]['latitude'])
-            lng = float(retDict['ResultSet']['Results'][0]['longitude'])
-            print("%s\t%f\t%f" % (lineArr[0], lat, lng))
-            fw.write('%s\t%f\t%f\n' % (line, lat, lng))
-        else:
-            print("error fetching")
-        sleep(1)
-    fw.close()
-
-
-def distSLC(vecA, vecB):
+def dist_slc(vec_a, vec_b):
     # Spherical Law of Cosines
-    a = sin(vecA[0, 1]*pi/180)*sin(vecB[0, 1]*pi/180)
-    b = cos(vecA[0, 1]*pi/180)*cos(vecB[0, 1]*pi/180)*cos(pi*(vecB[0, 0]-vecA[0, 0])/180)
-    return arccos(a + b)*6371.0     # pi is imported with numpy
+    vec_a_radian = vec_a[0, 1] * pi / 180
+    vec_b_radian = vec_b[0, 1] * pi / 180
+    a = sin(vec_a_radian) * sin(vec_b_radian)
+    # pi is imported with numpy
+    b = cos(vec_a_radian) * cos(vec_b_radian) * cos(pi * (vec_b[0, 0] - vec_a[0, 0]) / 180)
+    return arccos(a + b)*6371.0
 
 
-def clusterClubs(numClust=5):
-    datList = []
+def cluster_clubs(num_cluster=5):
+    dat_list = []
     for line in open('places.txt').readlines():
-        lineArr = line.split('\t')
-        datList.append([float(lineArr[4]), float(lineArr[3])])
-    datMat = mat(datList)
-    myCentroids, clustAssing = bisect_kmeans(datMat, numClust, dist_meas=distSLC)
+        line_arr = line.split('\t')
+        # 第五列经度，第四列纬度
+        dat_list.append([float(line_arr[4]), float(line_arr[3])])
+    dat_mat = mat(dat_list)
+    my_centroids, cluster_assessing = bisect_kmeans(dat_mat, num_cluster, dist_meas=dist_slc)
     fig = plt.figure()
     rect = [0.1, 0.1, 0.8, 0.8]
-    scatterMarkers = ['s', 'o', '^', '8', 'p', 'd', 'v', 'h', '>', '<']
-    axprops = dict(xticks=[], yticks=[])
-    ax0 = fig.add_axes(rect, label='ax0', **axprops)
-    imgP = plt.imread('Portland.png')
-    ax0.imshow(imgP)
+    scatter_markers = ['s', 'o', '^', '8', 'p', 'd', 'v', 'h', '>', '<']
+    ax_props = dict(xticks=[], yticks=[])
+    ax0 = fig.add_axes(rect, label='ax0', **ax_props)
+    img_p = plt.imread('Portland.png')
+    ax0.imshow(img_p)
     ax1 = fig.add_axes(rect, label='ax1', frameon=False)
-    for i in range(numClust):
-        ptsInCurrCluster = datMat[nonzero(clustAssing[:,0].A == i)[0],:]
-        markerStyle = scatterMarkers[i % len(scatterMarkers)]
-        ax1.scatter(
-            ptsInCurrCluster[:, 0].flatten().A[0], ptsInCurrCluster[:, 1].flatten().A[0],
-            marker=markerStyle, s=90)
-    ax1.scatter(myCentroids[:, 0].flatten().A[0], myCentroids[:, 1].flatten().A[0], marker='+', s=300)
+    for i in range(num_cluster):
+        pts_in_curr_cluster = dat_mat[nonzero(cluster_assessing[:, 0].A == i)[0], :]
+        marker_style = scatter_markers[i % len(scatter_markers)]
+        pts_longitude = pts_in_curr_cluster[:, 0].flatten().A[0]
+        pts_latitude = pts_in_curr_cluster[:, 1].flatten().A[0]
+        ax1.scatter(pts_longitude, pts_latitude, marker=marker_style, s=90)
+    my_centroids_longitude = my_centroids[:, 0].flatten().A[0]
+    my_centroids_latitude = my_centroids[:, 1].flatten().A[0]
+    ax1.scatter(my_centroids_longitude, my_centroids_latitude, marker='+', s=300)
     plt.show()
 
 
@@ -186,5 +159,6 @@ def bisect_kmeans_test():
 
 if __name__ == '__main__':
     # kmeans_test()
-    bisect_kmeans_test()
+    # bisect_kmeans_test()
+    cluster_clubs()
     print("Run kmeans finish")
