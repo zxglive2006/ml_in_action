@@ -151,7 +151,7 @@ if __name__ == '__main__':
     # print(split_data_set(myDat, 0, 1))
     # print(split_data_set(myDat, 0, 0))
     # print(choose_best_feature_to_split(myDat))
-    # from chapter03.treePlotter import retrieve_tree
+    # from chr03.treePlotter import retrieve_tree
     # my_tree = retrieve_tree(0)
     # print(my_tree)
     # print(classify(my_tree, labels, [1, 0]))
@@ -165,6 +165,6 @@ if __name__ == '__main__':
     lenses_labels = ['age', 'prescript', 'astigmatic', 'tearRate']
     lenses_tree = create_tree(lenses, lenses_labels)
     print(lenses_tree)
-    from chapter03.treePlotter import create_plot
+    from chr03.treePlotter import create_plot
     create_plot(lenses_tree)
     print("Run Decision Tree finish")
