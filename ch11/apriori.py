@@ -3,6 +3,9 @@
 Created on Mar 24, 2011
 Ch 11 code
 @author: Peter
+参考：
+https://en.wikipedia.org/wiki/Apriori_algorithm
+https://towardsdatascience.com/underrated-machine-learning-algorithms-apriori-1b1d7a8b7bc
 """
 from numpy import *
 
@@ -13,9 +16,9 @@ def load_data_set():
 
 def create_c1(data_set):
     """
-    构建集合C1,C1是大小为1的所有候选项集的集合
+    构建集合C1
     :param data_set:
-    :return:
+    :return: 长度为1的所有候选项集的集合
     """
     c1 = []
     for transaction in data_set:
@@ -54,33 +57,41 @@ def scan_d(data_set, c_k, min_support):
     return ret_list, support_data
 
 
-def aprioriGen(Lk, k):
+def apriori_gen(lk, k):
     # creates c_k
-    retList = []
-    lenLk = len(Lk)
-    for i in range(lenLk):
-        for j in range(i+1, lenLk): 
-            L1 = list(Lk[i])[:k-2]; L2 = list(Lk[j])[:k-2]
-            L1.sort(); L2.sort()
-            if L1==L2:  # if first k-2 elements are equal
-                retList.append(Lk[i] | Lk[j])   # set union
-    return retList
+    ret_list = []
+    len_lk = len(lk)
+    for i in range(len_lk):
+        for j in range(i+1, len_lk): 
+            lst_1 = list(lk[i])[:k-2]
+            lst_2 = list(lk[j])[:k-2]
+            lst_1.sort()
+            lst_2.sort()
+            if lst_1 == lst_2:  # if first k-2 elements are equal
+                ret_list.append(lk[i] | lk[j])   # set union
+    return ret_list
 
 
-def apriori(dataSet, minSupport=0.5):
-    C1 = create_c1(dataSet)
-    D = map(set, dataSet)
-    L1, supportData = scan_d(D, C1, minSupport)
-    L = [L1]
+def apriori(data_list, min_support=0.5):
+    """
+
+    :param data_list:
+    :param min_support:
+    :return:
+    """
+    candidate_set_1 = create_c1(data_list)
+    data_set = list(map(set, data_list))
+    item_set_1, support_data = scan_d(data_set, candidate_set_1, min_support)
+    item_set_list = [item_set_1]
     k = 2
-    while len(L[k-2]) > 0:
-        Ck = aprioriGen(L[k-2], k)
-        # scan DB to get Lk
-        Lk, supK = scan_d(D, Ck, minSupport)
-        supportData.update(supK)
-        L.append(Lk)
+    while len(item_set_list[k-2]) > 0:
+        candidate_set_k = apriori_gen(item_set_list[k - 2], k)
+        # scan DB to get lk
+        Lk, supK = scan_d(data_set, candidate_set_k, min_support)
+        support_data.update(supK)
+        item_set_list.append(Lk)
         k += 1
-    return L, supportData
+    return item_set_list, support_data
 
 
 def generateRules(L, supportData, minConf=0.7):
@@ -110,7 +121,7 @@ def calcConf(freqSet, H, supportData, brl, minConf=0.7):
 def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
     m = len(H[0])
     if len(freqSet) > (m + 1):      # try further merging
-        Hmp1 = aprioriGen(H, m+1)   # create Hm+1 new candidates
+        Hmp1 = apriori_gen(H, m + 1)   # create Hm+1 new candidates
         Hmp1 = calcConf(freqSet, Hmp1, supportData, brl, minConf)
         if len(Hmp1) > 1:           # need at least two sets to merge
             rulesFromConseq(freqSet, Hmp1, supportData, brl, minConf)
@@ -181,12 +192,15 @@ from time import sleep
 def apriori_test():
     my_data_set = load_data_set()
     print(my_data_set)
-    my_c1 = create_c1(my_data_set)
-    print(my_c1)
-    d = list(map(set, my_data_set))
-    print(d)
-    l1, support_data0 = scan_d(d, my_c1, 0.5)
-    print(l1)
+    # my_c1 = create_c1(my_data_set)
+    # print(my_c1)
+    # d = list(map(set, my_data_set))
+    # print(d)
+    # l1, support_data0 = scan_d(d, my_c1, 0.5)
+    # print(l1)
+    l, support_data = apriori(my_data_set, min_support=0.7)
+    print(l)
+    # print(apriori_gen(l[0], 2))
 
 
 if __name__ == '__main__':
