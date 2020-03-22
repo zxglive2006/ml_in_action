@@ -36,7 +36,7 @@ def scan_d(data_set, c_k, min_support):
     :param data_set: 数据集
     :param c_k: 候选项集列表
     :param min_support: 感兴趣项集的最小支持度
-    :return: 包含支持度值的列表
+    :return: 频繁项集列表和包含支持度值的列表
     """
     ss_cnt = {}
     for tid in data_set:
@@ -57,27 +57,32 @@ def scan_d(data_set, c_k, min_support):
     return ret_list, support_data
 
 
-def apriori_gen(lk, k):
-    # creates c_k
-    ret_list = []
-    len_lk = len(lk)
-    for i in range(len_lk):
-        for j in range(i+1, len_lk): 
-            lst_1 = list(lk[i])[:k-2]
-            lst_2 = list(lk[j])[:k-2]
+def apriori_gen(item_set_k_1, k):
+    """
+    创建候选项集Ck
+    :param item_set_k_1: 频繁项集元素列表Lk-1
+    :param k: 候选项集元素个数
+    :return: 候选项集列表Ck
+    """
+    candidate_set_k = []
+    len_item_set_k_1 = len(item_set_k_1)
+    for i in range(len_item_set_k_1):
+        for j in range(i+1, len_item_set_k_1):
+            lst_1 = list(item_set_k_1[i])[:k - 2]
+            lst_2 = list(item_set_k_1[j])[:k - 2]
             lst_1.sort()
             lst_2.sort()
             if lst_1 == lst_2:  # if first k-2 elements are equal
-                ret_list.append(lk[i] | lk[j])   # set union
-    return ret_list
+                candidate_set_k.append(item_set_k_1[i] | item_set_k_1[j])   # set union
+    return candidate_set_k
 
 
 def apriori(data_list, min_support=0.5):
     """
-
-    :param data_list:
-    :param min_support:
-    :return:
+    发现频繁项集
+    :param data_list: 原始数据列表
+    :param min_support: 最小支持度阈值
+    :return: 频繁项集列表和包含支持度数据的频繁项集字典
     """
     candidate_set_1 = create_c1(data_list)
     data_set = list(map(set, data_list))
@@ -85,55 +90,80 @@ def apriori(data_list, min_support=0.5):
     item_set_list = [item_set_1]
     k = 2
     while len(item_set_list[k-2]) > 0:
-        candidate_set_k = apriori_gen(item_set_list[k - 2], k)
-        # scan DB to get lk
-        Lk, supK = scan_d(data_set, candidate_set_k, min_support)
-        support_data.update(supK)
-        item_set_list.append(Lk)
+        candidate_set_k = apriori_gen(item_set_list[k-2], k)
+        # scan DB to get item_set_k_1
+        item_set_k, support_data_k = scan_d(data_set, candidate_set_k, min_support)
+        support_data.update(support_data_k)
+        item_set_list.append(item_set_k)
         k += 1
     return item_set_list, support_data
 
 
-def generateRules(L, supportData, minConf=0.7):
-    # supportData is a dict coming from scanD
-    bigRuleList = []
-    for i in range(1, len(L)):  # only get the sets with two or more items
-        for freqSet in L[i]:
-            H1 = [frozenset([item]) for item in freqSet]
+def generate_rules(item_set_list, support_data, min_conf=0.7):
+    """
+    生成关联规则
+    :param item_set_list: 频繁项集列表
+    :param support_data: 包含频繁项集支持数据的字典
+    :param min_conf: 最小可信度阈值
+    :return: 包含可信度的规则列表
+    """
+    big_rule_list = []
+    for i in range(1, len(item_set_list)):  # only get the sets with two or more items
+        for freq_set in item_set_list[i]:
+            h1 = [frozenset([item]) for item in freq_set]
             if i > 1:
-                rulesFromConseq(freqSet, H1, supportData, bigRuleList, minConf)
+                rules_from_conseq(freq_set, h1, support_data, big_rule_list, min_conf)
             else:
-                calcConf(freqSet, H1, supportData, bigRuleList, minConf)
-    return bigRuleList         
+                calc_conf(freq_set, h1, support_data, big_rule_list, min_conf)
+    return big_rule_list
 
 
-def calcConf(freqSet, H, supportData, brl, minConf=0.7):
-    prunedH = [] #create new list to return
-    for conseq in H:
-        conf = supportData[freqSet]/supportData[freqSet-conseq] #calc confidence
-        if conf >= minConf: 
-            print(freqSet-conseq,'-->',conseq,'conf:',conf)
-            brl.append((freqSet-conseq, conseq, conf))
-            prunedH.append(conseq)
-    return prunedH
+def calc_conf(freq_set, each_item_list, support_data, big_rule_list, min_conf=0.7):
+    """
+    计算可信度值
+    :param freq_set: 频繁项集
+    :param each_item_list: 频繁项集里面只包含单个元素集合的列表
+    :param support_data:
+    :param big_rule_list:
+    :param min_conf:
+    :return:
+    """
+    pruned_h = []        # create new list to return
+    for each_item_set in each_item_list:
+        # calculate confidence
+        conf = support_data[freq_set]/support_data[freq_set-each_item_set]
+        if conf >= min_conf:
+            print(freq_set - each_item_set, '-->', each_item_set, 'conf:', conf)
+            big_rule_list.append((freq_set - each_item_set, each_item_set, conf))
+            pruned_h.append(each_item_set)
+    return pruned_h
 
 
-def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
+def rules_from_conseq(freq_set, H, support_data, _big_rule_list, min_conf=0.7):
+    """
+    生成候选规则集合
+    :param freq_set:
+    :param H:
+    :param support_data:
+    :param _big_rule_list:
+    :param min_conf:
+    :return:
+    """
     m = len(H[0])
-    if len(freqSet) > (m + 1):      # try further merging
-        Hmp1 = apriori_gen(H, m + 1)   # create Hm+1 new candidates
-        Hmp1 = calcConf(freqSet, Hmp1, supportData, brl, minConf)
+    if len(freq_set) > (m + 1):         # try further merging
+        Hmp1 = apriori_gen(H, m + 1)    # create Hm+1 new candidates
+        Hmp1 = calc_conf(freq_set, Hmp1, support_data, _big_rule_list, min_conf)
         if len(Hmp1) > 1:           # need at least two sets to merge
-            rulesFromConseq(freqSet, Hmp1, supportData, brl, minConf)
+            rules_from_conseq(freq_set, Hmp1, support_data, _big_rule_list, min_conf)
 
 
-def pntRules(ruleList, itemMeaning):
-    for ruleTup in ruleList:
+def pnt_rules(rule_list, item_meaning):
+    for ruleTup in rule_list:
         for item in ruleTup[0]:
-            print(itemMeaning[item])
+            print(item_meaning[item])
         print("           -------->")
         for item in ruleTup[1]:
-            print(itemMeaning[item])
+            print(item_meaning[item])
         print("confidence: %f" % ruleTup[2])
         print("\n")       # print a blank line
         
@@ -161,10 +191,10 @@ from time import sleep
 # #     return actionIdList, billTitleList
         
 # def getTransList(actionIdList, billTitleList): #this will return a list of lists containing ints
-#     itemMeaning = ['Republican', 'Democratic']#list of what each item stands for
-#     for billTitle in billTitleList:#fill up itemMeaning list
-#         itemMeaning.append('%s -- Nay' % billTitle)
-#         itemMeaning.append('%s -- Yea' % billTitle)
+#     item_meaning = ['Republican', 'Democratic']#list of what each item stands for
+#     for billTitle in billTitleList:#fill up item_meaning list
+#         item_meaning.append('%s -- Nay' % billTitle)
+#         item_meaning.append('%s -- Yea' % billTitle)
 #     transDict = {}#list of items in each transaction (politician)
 #     voteCount = 2
 #     for actionId in actionIdList:
@@ -186,21 +216,22 @@ from time import sleep
 #         except:
 #             print("problem getting actionId: %d" % actionId)
 #         voteCount += 2
-#     return transDict, itemMeaning
+#     return transDict, item_meaning
 
 
 def apriori_test():
     my_data_set = load_data_set()
     print(my_data_set)
-    # my_c1 = create_c1(my_data_set)
-    # print(my_c1)
-    # d = list(map(set, my_data_set))
-    # print(d)
-    # l1, support_data0 = scan_d(d, my_c1, 0.5)
-    # print(l1)
-    l, support_data = apriori(my_data_set, min_support=0.7)
+    my_candidate_set_1 = create_c1(my_data_set)
+    print(my_candidate_set_1)
+    d = list(map(set, my_data_set))
+    print(d)
+    item_set_1, support_data0 = scan_d(d, my_candidate_set_1, 0.5)
+    print(item_set_1)
+    l, support_data = apriori(my_data_set)
     print(l)
-    # print(apriori_gen(l[0], 2))
+    rules = generate_rules(l, support_data)
+    print(rules)
 
 
 if __name__ == '__main__':
