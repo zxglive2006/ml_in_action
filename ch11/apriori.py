@@ -139,22 +139,22 @@ def calc_conf(freq_set, each_item_list, support_data, big_rule_list, min_conf=0.
     return pruned_h
 
 
-def rules_from_conseq(freq_set, H, support_data, _big_rule_list, min_conf=0.7):
+def rules_from_conseq(freq_set, h, support_data, big_rule_list, min_conf=0.7):
     """
     生成候选规则集合
     :param freq_set:
-    :param H:
+    :param h:
     :param support_data:
-    :param _big_rule_list:
+    :param big_rule_list:
     :param min_conf:
     :return:
     """
-    m = len(H[0])
+    m = len(h[0])
     if len(freq_set) > (m + 1):         # try further merging
-        Hmp1 = apriori_gen(H, m + 1)    # create Hm+1 new candidates
-        Hmp1 = calc_conf(freq_set, Hmp1, support_data, _big_rule_list, min_conf)
-        if len(Hmp1) > 1:           # need at least two sets to merge
-            rules_from_conseq(freq_set, Hmp1, support_data, _big_rule_list, min_conf)
+        hmp1 = apriori_gen(h, m + 1)    # create Hm+1 new candidates
+        hmp1 = calc_conf(freq_set, hmp1, support_data, big_rule_list, min_conf)
+        if len(hmp1) > 1:               # need at least two sets to merge
+            rules_from_conseq(freq_set, hmp1, support_data, big_rule_list, min_conf)
 
 
 def pnt_rules(rule_list, item_meaning):
@@ -167,8 +167,8 @@ def pnt_rules(rule_list, item_meaning):
         print("confidence: %f" % ruleTup[2])
         print("\n")       # print a blank line
         
-            
-from time import sleep
+
+# from time import sleep
 # from votesmart import votesmart
 # votesmart.apikey = 'get your api key first'
 # def getActionIds():
@@ -220,17 +220,23 @@ from time import sleep
 
 
 def apriori_test():
-    my_data_set = load_data_set()
-    print(my_data_set)
-    my_candidate_set_1 = create_c1(my_data_set)
-    print(my_candidate_set_1)
-    d = list(map(set, my_data_set))
-    print(d)
-    item_set_1, support_data0 = scan_d(d, my_candidate_set_1, 0.5)
-    print(item_set_1)
-    l, support_data = apriori(my_data_set)
-    print(l)
-    rules = generate_rules(l, support_data)
+    data_list = load_data_set()
+    print("data list")
+    print(data_list)
+    # my_candidate_set_1 = create_c1(data_list)
+    # print(my_candidate_set_1)
+    # d = list(map(set, data_list))
+    # print(d)
+    # item_set_1, support_data0 = scan_d(d, my_candidate_set_1, 0.5)
+    # print(item_set_1)
+    freq_set_list, support_data = apriori(data_list)
+    print("freq_set_list")
+    print(freq_set_list)
+    print("support data")
+    print(support_data)
+    print("generate rules")
+    rules = generate_rules(freq_set_list, support_data)
+    print("rules")
     print(rules)
 
 
