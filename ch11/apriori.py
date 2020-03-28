@@ -5,9 +5,13 @@ Ch 11 code
 @author: Peter
 参考：
 https://en.wikipedia.org/wiki/Apriori_algorithm
-https://towardsdatascience.com/underrated-machine-learning-algorithms-apriori-1b1d7a8b7bc
+http://api.votesmart.org/docs/terms.html
+https://github.com/ndanielsen/py-votesmart
 """
 from numpy import *
+from time import sleep
+from votesmart import votesmart
+votesmart.apikey = 'get your api key first'
 
 
 def load_data_set():
@@ -168,28 +172,27 @@ def pnt_rules(rule_list, item_meaning):
         print("\n")       # print a blank line
         
 
-# from time import sleep
-# from votesmart import votesmart
-# votesmart.apikey = 'get your api key first'
-# def getActionIds():
-# #     actionIdList = []; billTitleList = []
-# #     fr = open('recent20bills.txt')
-# #     for line in fr.readlines():
-# #         billNum = int(line.split('\t')[0])
-# #         try:
-# #             billDetail = votesmart.votes.getBill(billNum) #api call
-# #             for action in billDetail.actions:
-# #                 if action.level == 'House' and \
-# #                 (action.stage == 'Passage' or action.stage == 'Amendment Vote'):
-# #                     actionId = int(action.actionId)
-# #                     print('bill: %d has actionId: %d' % (billNum, actionId))
-# #                     actionIdList.append(actionId)
-# #                     billTitleList.append(line.strip().split('\t')[1])
-# #         except:
-# #             print("problem getting bill %d" % billNum)
-# #         sleep(1)                                      #delay to be polite
-# #     return actionIdList, billTitleList
-        
+def get_action_ids():
+    actionIdList = []
+    billTitleList = []
+    fr = open('recent20bills.txt')
+    for line in fr.readlines():
+        billNum = int(line.split('\t')[0])
+        try:
+            billDetail = votesmart.votes.getBill(billNum)   # api call
+            for action in billDetail.actions:
+                if action.level == 'House' and \
+                (action.stage == 'Passage' or action.stage == 'Amendment Vote'):
+                    actionId = int(action.actionId)
+                    print('bill: %d has actionId: %d' % (billNum, actionId))
+                    actionIdList.append(actionId)
+                    billTitleList.append(line.strip().split('\t')[1])
+        except:
+            print("problem getting bill %d" % billNum)
+        sleep(1)                                      # delay to be polite
+    return actionIdList, billTitleList
+
+
 # def getTransList(actionIdList, billTitleList): #this will return a list of lists containing ints
 #     item_meaning = ['Republican', 'Democratic']#list of what each item stands for
 #     for billTitle in billTitleList:#fill up item_meaning list
@@ -240,6 +243,13 @@ def apriori_test():
     print(rules)
 
 
+def vote_test():
+    action_ids,  bill_title_list = get_action_ids()
+    print(action_ids)
+    print(bill_title_list)
+
+
 if __name__ == '__main__':
-    apriori_test()
+    # apriori_test()
+    vote_test()
     print("Run apriori finish")
