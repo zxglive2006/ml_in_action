@@ -182,8 +182,8 @@ def get_action_ids():
         try:
             bill_detail = vsmart.Votes.getBill(bill_num)   # api call
             for action in bill_detail.actions:
-                if action.level == 'House' and \
-                (action.stage == 'Passage' or action.stage == 'Amendment Vote'):
+                if action.level == 'House' and (
+                        action.stage == 'Passage' or action.stage == 'Amendment Vote'):
                     action_id = int(action.actionId)
                     print('bill: %d has actionId: %d' % (bill_num, action_id))
                     action_id_list.append(action_id)
@@ -195,40 +195,40 @@ def get_action_ids():
     return action_id_list, bill_title_list
 
 
-def getTransList(actionIdList, billTitleList):
+def get_trans_list(action_id_list, bill_title_list):
     """
     this will return a list of lists containing ints
-    :param actionIdList:
-    :param billTitleList:
+    :param action_id_list:
+    :param bill_title_list:
     :return:
     """
-    item_meaning = ['Republican', 'Democratic']     # list of what each item stands for
-    for billTitle in billTitleList:             # fill up item_meaning list
+    item_meaning = ['Republican', 'Democratic']         # list of what each item stands for
+    for billTitle in bill_title_list:                   # fill up item_meaning list
         item_meaning.append('%s -- Nay' % billTitle)
         item_meaning.append('%s -- Yea' % billTitle)
-    transDict = {}  # list of items in each transaction (politician)
-    voteCount = 2
-    for actionId in actionIdList:
+    trans_dict = {}  # list of items in each transaction (politician)
+    vote_count = 2
+    for actionId in action_id_list:
         sleep(3)
         print('getting votes for actionId: %d' % actionId)
         try:
-            voteList = VoteSmartAPI.Votes.getBillActionVotes(actionId)
-            for vote in voteList:
-                if vote.candidateName not in transDict:
-                    transDict[vote.candidateName] = []
+            vote_list = VoteSmartAPI.Votes.getBillActionVotes(actionId)
+            for vote in vote_list:
+                if vote.candidateName not in trans_dict:
+                    trans_dict[vote.candidateName] = []
                     if vote.officeParties == 'Democratic':
-                        transDict[vote.candidateName].append(1)
+                        trans_dict[vote.candidateName].append(1)
                     elif vote.officeParties == 'Republican':
-                        transDict[vote.candidateName].append(0)
+                        trans_dict[vote.candidateName].append(0)
                 if vote.action == 'Nay':
-                    transDict[vote.candidateName].append(voteCount)
+                    trans_dict[vote.candidateName].append(vote_count)
                 elif vote.action == 'Yea':
-                    transDict[vote.candidateName].append(voteCount + 1)
+                    trans_dict[vote.candidateName].append(vote_count + 1)
         except Exception as ex:
             print(ex)
             print("problem getting actionId: %d" % actionId)
-        voteCount += 2
-    return transDict, item_meaning
+        vote_count += 2
+    return trans_dict, item_meaning
 
 
 def apriori_test():
@@ -253,9 +253,20 @@ def apriori_test():
 
 
 def vote_test():
+    """
+    My username: zxglive2020, Email: zxglive2006@gmail.com
+    :return:
+    """
     action_ids,  bill_title_list = get_action_ids()
     print(action_ids)
     print(bill_title_list)
+    trans_dict, item_meaning = get_trans_list(action_ids[:2], bill_title_list[:2])
+    for _key in trans_dict.keys():
+        print(trans_dict[_key])
+    data_set = [trans_dict[_key] for _key in trans_dict.keys()]
+    l, support_data = apriori(data_set, min_support=0.5)
+    rules = generate_rules(l, support_data, min_conf=0.99)
+    print(rules)
 
 
 def mushroom_test():
