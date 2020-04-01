@@ -1,15 +1,17 @@
-'''
+# encoding: UTF-8
+"""
 Created on Jun 1, 2011
-
 @author: Peter Harrington
-'''
+"""
 from numpy import *
 
-def loadDataSet(fileName, delim='\t'):
+
+def load_data_set(fileName, delim='\t'):
     fr = open(fileName)
     stringArr = [line.strip().split(delim) for line in fr.readlines()]
-    datArr = [map(float,line) for line in stringArr]
+    datArr = [map(float, line) for line in stringArr]
     return mat(datArr)
+
 
 def pca(dataMat, topNfeat=9999999):
     meanVals = mean(dataMat, axis=0)
@@ -23,10 +25,15 @@ def pca(dataMat, topNfeat=9999999):
     reconMat = (lowDDataMat * redEigVects.T) + meanVals
     return lowDDataMat, reconMat
 
+
 def replaceNanWithMean(): 
-    datMat = loadDataSet('secom.data', ' ')
+    datMat = load_data_set('secom.data', ' ')
     numFeat = shape(datMat)[1]
     for i in range(numFeat):
-        meanVal = mean(datMat[nonzero(~isnan(datMat[:,i].A))[0],i]) #values that are not NaN (a number)
+        meanVal = mean(datMat[nonzero(~isnan(datMat[:,i].A))[0], i]) #values that are not NaN (a number)
         datMat[nonzero(isnan(datMat[:,i].A))[0],i] = meanVal  #set NaN values to mean
     return datMat
+
+
+if __name__ == '__main__':
+    print("Run PCA finish")
