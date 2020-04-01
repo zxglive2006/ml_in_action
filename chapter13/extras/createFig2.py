@@ -8,7 +8,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pca
 
-dataMat = pca.loadDataSet('testSet.txt')
+dataMat = pca.load_data_set('testSet.txt')
 lowDMat, reconMat = pca.pca(dataMat, 1)
 
 fig = plt.figure()

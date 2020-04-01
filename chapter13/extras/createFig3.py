@@ -42,7 +42,7 @@ ax.scatter(xcord0,ycord0, marker='^', s=90)
 ax.scatter(xcord1,ycord1, marker='o', s=50,  c='red')
 ax.scatter(xcord2,ycord2, marker='v', s=50,  c='yellow')
 ax = fig.add_subplot(212)
-myDat = pca.loadDataSet('testSet3.txt')
+myDat = pca.load_data_set('testSet3.txt')
 lowDDat,reconDat = pca.pca(myDat[:,0:2],1)
 label0Mat = lowDDat[nonzero(myDat[:,2]==0)[0],:2][0] #get the items with label 0
 label1Mat = lowDDat[nonzero(myDat[:,2]==1)[0],:2][0] #get the items with label 1
