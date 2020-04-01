@@ -1,14 +1,12 @@
-# ml_in_action
-#### 机器学习实战书籍源码, 基于Python 3.7.6适配完善
+Machine Learning in Action 
+==========================
+
+### 机器学习实战书籍源码, 基于Python 3.7.6适配完善
 
 ### 需要安装的包：
 ##### pip install feedparser
 
 #### https://github.com/votesmart/python-votesmart
-
-
-Machine Learning in Action 
-==========================
 
 This is the source code to go with "Machine Learning in Action" 
 by Peter Harrington published by Manning Inc.
