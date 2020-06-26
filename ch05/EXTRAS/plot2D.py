@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import logRegres
 
-dataMat,labelMat=logRegres.loadDataSet()
+dataMat,labelMat=logRegres.load_data_set()
 dataArr = array(dataMat)
 weights = logRegres.stocGradAscent0(dataArr,labelMat)
 

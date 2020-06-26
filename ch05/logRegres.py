@@ -1,38 +1,44 @@
-'''
+"""
 Created on Oct 27, 2010
 Logistic Regression Working Module
 @author: Peter
-'''
+"""
+
 from numpy import *
 
-def loadDataSet():
-    dataMat = []; labelMat = []
+
+def load_data_set():
+    _data_mat = []
+    _label_mat = []
     fr = open('testSet.txt')
     for line in fr.readlines():
-        lineArr = line.strip().split()
-        dataMat.append([1.0, float(lineArr[0]), float(lineArr[1])])
-        labelMat.append(int(lineArr[2]))
-    return dataMat,labelMat
+        line_arr = line.strip().split()
+        _data_mat.append([1.0, float(line_arr[0]), float(line_arr[1])])
+        _label_mat.append(int(line_arr[2]))
+    return _data_mat, _label_mat
 
-def sigmoid(inX):
-    return 1.0/(1+exp(-inX))
 
-def gradAscent(dataMatIn, classLabels):
-    dataMatrix = mat(dataMatIn)             #convert to NumPy matrix
-    labelMat = mat(classLabels).transpose() #convert to NumPy matrix
-    m,n = shape(dataMatrix)
+def sigmoid(in_x):
+    return 1.0/(1 + exp(-in_x))
+
+
+def grad_ascent(data_mat_in, class_labels):
+    data_matrix = mat(data_mat_in)                 # convert to NumPy matrix
+    label_mat = mat(class_labels).transpose()        # convert to NumPy matrix
+    m, n = shape(data_matrix)
     alpha = 0.001
     maxCycles = 500
     weights = ones((n,1))
-    for k in range(maxCycles):              #heavy on matrix operations
-        h = sigmoid(dataMatrix*weights)     #matrix mult
-        error = (labelMat - h)              #vector subtraction
-        weights = weights + alpha * dataMatrix.transpose()* error #matrix mult
+    for k in range(maxCycles):                  # heavy on matrix operations
+        h = sigmoid(data_matrix*weights)         # matrix multiply
+        error = (label_mat - h)                  # vector subtraction
+        weights = weights + alpha * data_matrix.transpose()* error   # matrix multiply
     return weights
+
 
 def plotBestFit(weights):
     import matplotlib.pyplot as plt
-    dataMat,labelMat=loadDataSet()
+    dataMat,labelMat=load_data_set()
     dataArr = array(dataMat)
     n = shape(dataArr)[0] 
     xcord1 = []; ycord1 = []
@@ -49,18 +55,21 @@ def plotBestFit(weights):
     x = arange(-3.0, 3.0, 0.1)
     y = (-weights[0]-weights[1]*x)/weights[2]
     ax.plot(x, y)
-    plt.xlabel('X1'); plt.ylabel('X2');
+    plt.xlabel('X1')
+    plt.ylabel('X2')
     plt.show()
+
 
 def stocGradAscent0(dataMatrix, classLabels):
     m,n = shape(dataMatrix)
     alpha = 0.01
-    weights = ones(n)   #initialize to all ones
+    weights = ones(n)   # initialize to all ones
     for i in range(m):
         h = sigmoid(sum(dataMatrix[i]*weights))
         error = classLabels[i] - h
         weights = weights + alpha * error * dataMatrix[i]
     return weights
+
 
 def stocGradAscent1(dataMatrix, classLabels, numIter=150):
     m,n = shape(dataMatrix)
@@ -76,10 +85,12 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
             del(dataIndex[randIndex])
     return weights
 
+
 def classifyVector(inX, weights):
     prob = sigmoid(sum(inX*weights))
     if prob > 0.5: return 1.0
     else: return 0.0
+
 
 def colicTest():
     frTrain = open('horseColicTraining.txt'); frTest = open('horseColicTest.txt')
@@ -92,7 +103,8 @@ def colicTest():
         trainingSet.append(lineArr)
         trainingLabels.append(float(currLine[21]))
     trainWeights = stocGradAscent1(array(trainingSet), trainingLabels, 1000)
-    errorCount = 0; numTestVec = 0.0
+    errorCount = 0
+    numTestVec = 0.0
     for line in frTest.readlines():
         numTestVec += 1.0
         currLine = line.strip().split('\t')
@@ -102,12 +114,19 @@ def colicTest():
         if int(classifyVector(array(lineArr), trainWeights))!= int(currLine[21]):
             errorCount += 1
     errorRate = (float(errorCount)/numTestVec)
-    print "the error rate of this test is: %f" % errorRate
+    print("the error rate of this test is: %f" % errorRate)
     return errorRate
 
+
 def multiTest():
-    numTests = 10; errorSum=0.0
+    numTests = 10
+    errorSum = 0.0
     for k in range(numTests):
         errorSum += colicTest()
-    print "after %d iterations the average error rate is: %f" % (numTests, errorSum/float(numTests))
-        
+    print("after %d iterations the average error rate is: %f" % (numTests, errorSum/float(numTests)))
+
+
+if __name__ == '__main__':
+    data_arr, label_mat = load_data_set()
+    print(grad_ascent(data_arr, label_mat))
+    print("Run Logistic finish")

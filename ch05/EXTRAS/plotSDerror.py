@@ -42,7 +42,7 @@ def stocGradAscent1(dataMatrix, classLabels):
     return weightsHistory
     
 
-dataMat,labelMat=logRegres.loadDataSet()
+dataMat,labelMat=logRegres.load_data_set()
 dataArr = array(dataMat)
 myHist = stocGradAscent1(dataArr,labelMat)
 
