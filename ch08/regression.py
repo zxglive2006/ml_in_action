@@ -47,7 +47,7 @@ def lwlr(test_point, _x_arr, _y_arr, k=1.0):
     y_mat = mat(_y_arr).T
     m = shape(x_mat)[0]
     weights = mat(eye(m))
-    # next 2 lines create weights matrix
+    # next 2 lines create arr_weights matrix
     for j in range(m):
         diff_mat = test_point - x_mat[j, :]
         weights[j, j] = exp(diff_mat*diff_mat.T/(-2.0*k**2))

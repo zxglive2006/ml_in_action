@@ -11,7 +11,7 @@ import logRegres
 
 dataMat,labelMat=logRegres.load_data_set()
 dataArr = array(dataMat)
-weights = logRegres.stocGradAscent0(dataArr,labelMat)
+weights = logRegres.stoc_grad_ascent0(dataArr, labelMat)
 
 n = shape(dataArr)[0] #number of points to create
 xcord1 = []; ycord1 = []
@@ -31,8 +31,8 @@ ax = fig.add_subplot(111)
 type1 = ax.scatter(xcord1, ycord1, s=30, c='red', marker='s')
 type2 = ax.scatter(xcord2, ycord2, s=30, c='green')
 x = arange(-3.0, 3.0, 0.1)
-#weights = [-2.9, 0.72, 1.29]
-#weights = [-5, 1.09, 1.42]
+#arr_weights = [-2.9, 0.72, 1.29]
+#arr_weights = [-5, 1.09, 1.42]
 weights = [13.03822793,   1.32877317,  -1.96702074]
 weights = [4.12,   0.48,  -0.6168]
 y = (-weights[0]-weights[1]*x)/weights[2]
