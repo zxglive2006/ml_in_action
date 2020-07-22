@@ -3,8 +3,8 @@ Created on Oct 27, 2010
 Logistic Regression Working Module
 @author: Peter
 """
-
 from numpy import *
+import matplotlib.pyplot as plt
 
 
 def load_data_set():
@@ -31,31 +31,30 @@ def grad_ascent(data_mat_in, class_labels):
     _weights = ones((n, 1))
     for k in range(max_cycles):                          # heavy on matrix operations
         h = sigmoid(data_matrix * _weights)              # matrix multiply
-        error = (_label_mat - h)                         # vector subtraction
+        error = _label_mat - h                           # vector subtraction
         _weights = _weights + alpha * data_matrix.transpose() * error   # matrix multiply
     return _weights
 
 
 def plot_best_fit(arr_weights):
-    import matplotlib.pyplot as plt
     _data_mat, _label_mat = load_data_set()
     _data_arr = array(_data_mat)
     n = shape(_data_arr)[0]
-    xcord1 = []
-    ycord1 = []
-    xcord2 = []
-    ycord2 = []
+    x_cord1 = []
+    y_cord1 = []
+    x_cord2 = []
+    y_cord2 = []
     for i in range(n):
         if int(_label_mat[i]) == 1:
-            xcord1.append(_data_arr[i, 1])
-            ycord1.append(_data_arr[i, 2])
+            x_cord1.append(_data_arr[i, 1])
+            y_cord1.append(_data_arr[i, 2])
         else:
-            xcord2.append(_data_arr[i,1])
-            ycord2.append(_data_arr[i,2])
+            x_cord2.append(_data_arr[i,1])
+            y_cord2.append(_data_arr[i,2])
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.scatter(xcord1, ycord1, s=30, c='red', marker='s')
-    ax.scatter(xcord2, ycord2, s=30, c='green')
+    ax.scatter(x_cord1, y_cord1, s=30, c='red', marker='s')
+    ax.scatter(x_cord2, y_cord2, s=30, c='green')
     x = arange(-3.0, 3.0, 0.1)
     y = (-arr_weights[0] - arr_weights[1] * x) / arr_weights[2]
     ax.plot(x, y)
@@ -75,19 +74,19 @@ def stoc_grad_ascent0(data_matrix, class_labels):
     return _weights
 
 
-def stocGradAscent1(dataMatrix, classLabels, numIter=150):
-    m, n = shape(dataMatrix)
-    weights = ones(n)       # initialize to all ones
-    for j in range(numIter):
-        dataIndex = range(m)
+def stoc_grad_ascent1(data_matrix, class_labels, num_iter=150):
+    m, n = shape(data_matrix)
+    _weights = ones(n)       # initialize to all ones
+    for j in range(num_iter):
+        data_index = [x for x in range(m)]
         for i in range(m):
-            alpha = 4/(1.0+j+i)+0.0001    # apha decreases with iteration, does not
-            randIndex = int(random.uniform(0, len(dataIndex)))   # go to 0 because of the constant
-            h = sigmoid(sum(dataMatrix[randIndex]*weights))
-            error = classLabels[randIndex] - h
-            weights = weights + alpha * error * dataMatrix[randIndex]
-            del(dataIndex[randIndex])
-    return weights
+            alpha = 4 / (1.0 + j + i) + 0.0001    # alpha decreases with iteration, does not
+            rand_index = int(random.uniform(0, len(data_index)))   # go to 0 because of the constant
+            h = sigmoid(sum(data_matrix[rand_index] * _weights))
+            error = class_labels[rand_index] - h
+            _weights = _weights + alpha * error * data_matrix[rand_index]
+            del(data_index[rand_index])
+    return _weights
 
 
 def classifyVector(inX, weights):
@@ -101,7 +100,8 @@ def classifyVector(inX, weights):
 def colicTest():
     frTrain = open('horseColicTraining.txt')
     frTest = open('horseColicTest.txt')
-    trainingSet = []; trainingLabels = []
+    trainingSet = []
+    trainingLabels = []
     for line in frTrain.readlines():
         currLine = line.strip().split('\t')
         lineArr =[]
@@ -109,7 +109,7 @@ def colicTest():
             lineArr.append(float(currLine[i]))
         trainingSet.append(lineArr)
         trainingLabels.append(float(currLine[21]))
-    trainWeights = stocGradAscent1(array(trainingSet), trainingLabels, 1000)
+    trainWeights = stoc_grad_ascent1(array(trainingSet), trainingLabels, 1000)
     errorCount = 0
     numTestVec = 0.0
     for line in frTest.readlines():
@@ -136,8 +136,8 @@ def multiTest():
 if __name__ == '__main__':
     data_arr, label_mat = load_data_set()
     # weights = grad_ascent(data_arr, label_mat).getA()
-    weights = stoc_grad_ascent0(array(data_arr), label_mat)
-    print(type(weights))
+    # weights = stoc_grad_ascent0(array(data_arr), label_mat)
+    weights = stoc_grad_ascent1(array(data_arr), label_mat)
     print(weights)
     plot_best_fit(weights)
     print("Run Logistic finish")
