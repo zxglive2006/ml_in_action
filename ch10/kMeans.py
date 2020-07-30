@@ -117,7 +117,7 @@ def cluster_clubs(num_cluster=5):
     my_centroids, cluster_assessing = bisect_kmeans(dat_mat, num_cluster, dist_meas=dist_slc)
     fig = plt.figure()
     rect = [0.1, 0.1, 0.8, 0.8]
-    scatter_markers = ['s', 'o', '^', '8', 'p', 'd', 'v', 'h', '>', '<']
+    scatter_markers = ['s', 'o', '^', '8', 'p', 'd', 'v', 'high', '>', '<']
     ax_props = dict(xticks=[], yticks=[])
     ax0 = fig.add_axes(rect, label='ax0', **ax_props)
     img_p = plt.imread('Portland.png')

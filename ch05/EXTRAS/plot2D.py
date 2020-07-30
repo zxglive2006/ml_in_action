@@ -1,15 +1,14 @@
-'''
+"""
 Created on Oct 6, 2010
-
 @author: Peter
-'''
+"""
 from numpy import *
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-import logRegres
+import ch05.logRegres as logRegres
 
-dataMat,labelMat=logRegres.load_data_set()
+dataMat,labelMat = logRegres.load_data_set()
 dataArr = array(dataMat)
 weights = logRegres.stoc_grad_ascent0(dataArr, labelMat)
 
