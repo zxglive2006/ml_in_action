@@ -52,7 +52,7 @@ for i in range(300):
         xcord1.append(x*cos(2.0*pi*y)); ycord1.append(x*sin(2.0*pi*y))
 ax.scatter(xcord0,ycord0, marker='s', s=90)
 ax.scatter(xcord1,ycord1, marker='o', s=50, c='red')
-plt.title('C')
+plt.title('c')
 ax = fig.add_subplot(224)
 xcord1 = zeros(150); ycord1 = zeros(150)
 xcord0 = random.uniform(-3,3,350); ycord0 = random.uniform(-3,3,350);
