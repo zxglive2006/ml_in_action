@@ -122,22 +122,19 @@ def kernelTrans(X, A, kTup):
 
 class optStruct:
     # Initialize the structure with the parameters
-    def __init__(self, dataMatIn, classLabels, C, toler, kTup):
-        self.X = dataMatIn
-        self.labelMat = classLabels
-        self.C = C
+    def __init__(self, data_mat_in, class_labels, c, toler):
+        self.X = data_mat_in
+        self.labelMat = class_labels
+        self.C = c
         self.tol = toler
-        self.m = shape(dataMatIn)[0]
+        self.m = shape(data_mat_in)[0]
         self.alphas = mat(zeros((self.m, 1)))
         self.b = 0
         self.eCache = mat(zeros((self.m, 2)))  # first column is valid flag
-        self.K = mat(zeros((self.m, self.m)))
-        for i in range(self.m):
-            self.K[:, i] = kernelTrans(self.X, self.X[i, :], kTup)
 
 
 def calcEk(oS, k):
-    fXk = float(multiply(oS.alphas, oS.labelMat).T * oS.K[:, k] + oS.my_b)
+    fXk = float(multiply(oS.alphas, oS.labelMat).T * (oS.X * oS.X[k, :].T)) + oS.b
     Ek = fXk - float(oS.labelMat[k])
     return Ek
 
@@ -173,56 +170,65 @@ def updateEk(oS, k):  # after any alpha has changed update the new value in the 
 
 def innerL(i, oS):
     Ei = calcEk(oS, i)
-    if ((oS.labelMat[i] * Ei < -oS.tol) and (oS.alphas[i] < oS.C)) or (
-            (oS.labelMat[i] * Ei > oS.tol) and (oS.alphas[i] > 0)):
+    if (oS.labelMat[i] * Ei < -oS.tol and oS.alphas[i] < oS.C) or (
+            oS.labelMat[i] * Ei > oS.tol and oS.alphas[i] > 0):
         j, Ej = selectJ(i, oS, Ei)  # this has been changed from selectJrand
-        alphaIold = oS.alphas[i].copy();
-        alphaJold = oS.alphas[j].copy()
+        alpha_i_old = oS.alphas[i].copy()
+        alpha_j_old = oS.alphas[j].copy()
         if oS.labelMat[i] != oS.labelMat[j]:
-            L = max(0, oS.alphas[j] - oS.alphas[i])
+            low = max(0, oS.alphas[j] - oS.alphas[i])
             H = min(oS.C, oS.C + oS.alphas[j] - oS.alphas[i])
         else:
-            L = max(0, oS.alphas[j] + oS.alphas[i] - oS.C)
+            low = max(0, oS.alphas[j] + oS.alphas[i] - oS.C)
             H = min(oS.C, oS.alphas[j] + oS.alphas[i])
-        if L == H:
+        if low == H:
             print("low==high")
             return 0
-        eta = 2.0 * oS.K[i, j] - oS.K[i, i] - oS.K[j, j]  # changed for kernel
+        # changed for kernel
+        eta = 2.0*oS.X[i, :]*oS.X[j, :].T - oS.X[i, :]*oS.X[i, :].T - oS.X[j, :]*oS.X[j, :].T
         if eta >= 0:
             print("eta>=0")
             return 0
         oS.alphas[j] -= oS.labelMat[j] * (Ei - Ej) / eta
-        oS.alphas[j] = clip_alpha(oS.alphas[j], H, L)
+        oS.alphas[j] = clip_alpha(oS.alphas[j], H, low)
         updateEk(oS, j)  # added this for the Ecache
-        if abs(oS.alphas[j] - alphaJold) < 0.00001:
+        if abs(oS.alphas[j] - alpha_j_old) < 0.00001:
             print("j not moving enough")
             return 0
         # update i by the same amount as j
-        oS.alphas[i] += oS.labelMat[j] * oS.labelMat[i] * (alphaJold - oS.alphas[j])
-        # added this for the Ecache, the update is in the oppostie direction
+        oS.alphas[i] += oS.labelMat[j] * oS.labelMat[i] * (alpha_j_old - oS.alphas[j])
+        # added this for the Ecache, the update is in the opposite direction
         updateEk(oS, i)
-        b1 = oS.my_b - Ei - oS.labelMat[i] * (oS.alphas[i] - alphaIold) * oS.K[i, i] - oS.labelMat[j] * (
-                    oS.alphas[j] - alphaJold) * oS.K[i, j]
-        b2 = oS.my_b - Ej - oS.labelMat[i] * (oS.alphas[i] - alphaIold) * oS.K[i, j] - oS.labelMat[j] * (
-                    oS.alphas[j] - alphaJold) * oS.K[j, j]
-        if (0 < oS.alphas[i]) and (oS.C > oS.alphas[i]):
-            oS.my_b = b1
-        elif (0 < oS.alphas[j]) and (oS.C > oS.alphas[j]):
-            oS.my_b = b2
+        b1 = oS.b - Ei - oS.labelMat[i] * (oS.alphas[i] - alpha_i_old) * oS.X[i, :] * oS.X[i, :].T \
+            - oS.labelMat[j] * (oS.alphas[j] - alpha_j_old) * oS.X[i, :] * oS.X[j, :].T
+        b2 = oS.b - Ej - oS.labelMat[i] * (oS.alphas[i] - alpha_i_old) * oS.X[i, :] * oS.X[i, :].T \
+            - oS.labelMat[j] * (oS.alphas[j] - alpha_j_old) * oS.X[i, :] * oS.X[j, :].T
+        if 0 < oS.alphas[i] < oS.C:
+            oS.b = b1
+        elif 0 < oS.alphas[j] < oS.C:
+            oS.b = b2
         else:
-            oS.my_b = (b1 + b2) / 2.0
+            oS.b = (b1 + b2) / 2.0
         return 1
     else:
         return 0
 
 
-def smoP(dataMatIn, classLabels, C, toler, maxIter, kTup=('lin', 0)):
-    # full Platt SMO
-    oS = optStruct(mat(dataMatIn), mat(classLabels).transpose(), C, toler, kTup)
+def smo_p(data_mat_in, class_labels, C, toler, maxIter):
+    """
+    SMO算法完整版本
+    :param data_mat_in: 
+    :param class_labels: 
+    :param C: 
+    :param toler: 
+    :param maxIter: 
+    :return: 
+    """
+    oS = optStruct(mat(data_mat_in), mat(class_labels).transpose(), C, toler)
     iter = 0
     entireSet = True
     alphaPairsChanged = 0
-    while (iter < maxIter) and ((alphaPairsChanged > 0) or entireSet):
+    while iter < maxIter and (alphaPairsChanged > 0 or entireSet):
         alphaPairsChanged = 0
         if entireSet:  # go over all
             for i in range(oS.m):
@@ -244,7 +250,7 @@ def smoP(dataMatIn, classLabels, C, toler, maxIter, kTup=('lin', 0)):
 
 
 def calcWs(alphas, dataArr, classLabels):
-    X = mat(dataArr);
+    X = mat(dataArr)
     labelMat = mat(classLabels).transpose()
     m, n = shape(X)
     w = zeros((n, 1))
@@ -256,7 +262,7 @@ def calcWs(alphas, dataArr, classLabels):
 def testRbf(k1=1.3):
     dataArr, labelArr = load_data_set('testSetRBF.txt')
     # c=200 important
-    b, alphas = smoP(dataArr, labelArr, 200, 0.0001, 10000, ('rbf', k1))
+    b, alphas = smo_p(dataArr, labelArr, 200, 0.0001, 10000)
     datMat = mat(dataArr)
     labelMat = mat(labelArr).transpose()
     svInd = nonzero(alphas.A > 0)[0]
@@ -313,7 +319,7 @@ def loadImages(dirName):
 
 def testDigits(kTup=('rbf', 10)):
     dataArr, labelArr = loadImages('trainingDigits')
-    b, alphas = smoP(dataArr, labelArr, 200, 0.0001, 10000, kTup)
+    b, alphas = smo_p(dataArr, labelArr, 200, 0.0001, 10000)
     datMat = mat(dataArr)
     labelMat = mat(labelArr).transpose()
     svInd = nonzero(alphas.A > 0)[0]
@@ -461,11 +467,12 @@ def smoPK(data_mat_in, class_labels, C, toler, maxIter):
 if __name__ == '__main__':
     dataArr, labelArr = load_data_set("testSet.txt")
     print(labelArr)
-    my_b, my_alphas = smo_simple(dataArr, labelArr, 0.6, 0.001, 40)
+    # my_b, my_alphas = smo_simple(dataArr, labelArr, 0.6, 0.001, 40)
+    my_b, my_alphas = smo_p(dataArr, labelArr, 0.6, 0.001, 40)
     print("b:{}".format(my_b))
+    print("alphas shape:{}".format(shape(my_alphas)))
     print("alphas>0:{}".format(my_alphas[my_alphas > 0]))
-    print(shape(my_alphas[my_alphas>0]))
-    for i in range(100):
-        if my_alphas[i] > 0.0:
-            print(dataArr[i], labelArr[i])
+    for index in range(100):
+        if my_alphas[index] > 0.0:
+            print(my_alphas[index], dataArr[index], labelArr[index])
     print("Run svm finish")
