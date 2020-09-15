@@ -1,125 +1,173 @@
-'''
+"""
 Created on Nov 28, 2010
 Adaboost is short for Adaptive Boosting
 @author: Peter
-'''
-from numpy import *
+"""
+from numpy import array, ones, shape, mat, inf, zeros, multiply, exp, sign
+from math import log
+import matplotlib.pyplot as plt
 
-def loadSimpData():
-    datMat = matrix([[ 1. ,  2.1],
-        [ 2. ,  1.1],
-        [ 1.3,  1. ],
-        [ 1. ,  1. ],
-        [ 2. ,  1. ]])
-    classLabels = [1.0, 1.0, -1.0, -1.0, 1.0]
-    return datMat,classLabels
 
-def loadDataSet(fileName):      #general function to parse tab -delimited floats
-    numFeat = len(open(fileName).readline().split('\t')) #get number of fields 
-    dataMat = []; labelMat = []
-    fr = open(fileName)
+def load_simple_data():
+    dat_mat = array([
+        [1., 2.1],
+        [2., 1.1],
+        [1.3, 1.],
+        [1., 1.],
+        [2., 1.]
+    ])
+    class_labels = [1.0, 1.0, -1.0, -1.0, 1.0]
+    return dat_mat, class_labels
+
+
+# general function to parse tab -delimited floats
+def load_data_set(file_name):
+    # get number of fields
+    num_feat = len(open(file_name).readline().split('\t'))
+    data_mat = []
+    label_mat = []
+    fr = open(file_name)
     for line in fr.readlines():
-        lineArr =[]
-        curLine = line.strip().split('\t')
-        for i in range(numFeat-1):
-            lineArr.append(float(curLine[i]))
-        dataMat.append(lineArr)
-        labelMat.append(float(curLine[-1]))
-    return dataMat,labelMat
+        line_arr = []
+        cur_line = line.strip().split('\t')
+        for i in range(num_feat-1):
+            line_arr.append(float(cur_line[i]))
+        data_mat.append(line_arr)
+        label_mat.append(float(cur_line[-1]))
+    return data_mat, label_mat
 
-def stumpClassify(dataMatrix,dimen,threshVal,threshIneq):#just classify the data
-    retArray = ones((shape(dataMatrix)[0],1))
-    if threshIneq == 'lt':
-        retArray[dataMatrix[:,dimen] <= threshVal] = -1.0
+
+# just classify the data
+def stump_classify(data_matrix, dimension, thresh_val, thresh_inequal):
+    ret_array = ones((shape(data_matrix)[0], 1))
+    if thresh_inequal == 'lt':
+        ret_array[data_matrix[:, dimension] <= thresh_val] = -1.0
     else:
-        retArray[dataMatrix[:,dimen] > threshVal] = -1.0
-    return retArray
+        ret_array[data_matrix[:, dimension] > thresh_val] = -1.0
+    return ret_array
     
 
-def buildStump(dataArr,classLabels,D):
-    dataMatrix = mat(dataArr); labelMat = mat(classLabels).T
-    m,n = shape(dataMatrix)
-    numSteps = 10.0; bestStump = {}; bestClasEst = mat(zeros((m,1)))
-    minError = inf #init error sum, to +infinity
-    for i in range(n):#loop over all dimensions
-        rangeMin = dataMatrix[:,i].min(); rangeMax = dataMatrix[:,i].max();
-        stepSize = (rangeMax-rangeMin)/numSteps
-        for j in range(-1,int(numSteps)+1):#loop over all range in current dimension
-            for inequal in ['lt', 'gt']: #go over less than and greater than
-                threshVal = (rangeMin + float(j) * stepSize)
-                predictedVals = stumpClassify(dataMatrix,i,threshVal,inequal)#call stump classify with i, j, lessThan
-                errArr = mat(ones((m,1)))
-                errArr[predictedVals == labelMat] = 0
-                weightedError = D.T*errArr  #calc total error multiplied by D
-                #print "split: dim %d, thresh %.2f, thresh ineqal: %s, the weighted error is %.3f" % (i, threshVal, inequal, weightedError)
-                if weightedError < minError:
-                    minError = weightedError
-                    bestClasEst = predictedVals.copy()
-                    bestStump['dim'] = i
-                    bestStump['thresh'] = threshVal
-                    bestStump['ineq'] = inequal
-    return bestStump,minError,bestClasEst
+def build_stump(dataArr, class_labels, D):
+    data_matrix = mat(dataArr)
+    label_mat = mat(class_labels).T
+    m, n = shape(data_matrix)
+    num_steps = 10.0
+    best_stump = {}
+    best_class_est = mat(zeros((m, 1)))
+    min_error = inf     # init error sum, to +infinity
+    for i in range(n):  # loop over all dimensions
+        range_min = data_matrix[:, i].min()
+        range_max = data_matrix[:, i].max()
+        step_size = (range_max-range_min)/num_steps
+        # loop over all range in current dimension
+        for j in range(-1, int(num_steps)+1):
+            for inequal in ['lt', 'gt']:    # go over less than and greater than
+                thresh_val = range_min + float(j) * step_size
+                # call stump classify with i, j, lessThan
+                predicted_vals = stump_classify(data_matrix, i, thresh_val, inequal)
+                err_arr = mat(ones((m, 1)))
+                err_arr[predicted_vals == label_mat] = 0
+                weighted_error = D.T*err_arr  # calc total error multiplied by D
+                # print("split: dim %d, thresh %.2f, thresh inequal: %s, the weighted error is %.3f"
+                #       % (i, thresh_val, inequal, weighted_error))
+                if weighted_error < min_error:
+                    min_error = weighted_error
+                    best_class_est = predicted_vals.copy()
+                    best_stump['dim'] = i
+                    best_stump['thresh'] = thresh_val
+                    best_stump['ineq'] = inequal
+    return best_stump, min_error, best_class_est
 
 
-def adaBoostTrainDS(dataArr,classLabels,numIt=40):
-    weakClassArr = []
-    m = shape(dataArr)[0]
-    D = mat(ones((m,1))/m)   #init D to all equal
-    aggClassEst = mat(zeros((m,1)))
-    for i in range(numIt):
-        bestStump,error,classEst = buildStump(dataArr,classLabels,D)#build Stump
-        #print "D:",D.T
-        alpha = float(0.5*log((1.0-error)/max(error,1e-16)))#calc alpha, throw in max(error,eps) to account for error=0
-        bestStump['alpha'] = alpha  
-        weakClassArr.append(bestStump)                  #store Stump Params in Array
-        #print "classEst: ",classEst.T
-        expon = multiply(-1*alpha*mat(classLabels).T,classEst) #exponent for D calc, getting messy
-        D = multiply(D,exp(expon))                              #Calc New D for next iteration
+def ada_boost_train_ds(data_arr, class_labels, num_it=40):
+    """
+    使用单层决策树作为弱分类器的AdaBoost算法
+    :param data_arr:
+    :param class_labels:
+    :param num_it: 迭代次数
+    :return:
+    """
+    weak_class_arr = []
+    m = shape(data_arr)[0]
+    D = mat(ones((m, 1))/m)   # init D to all equal
+    agg_class_est = mat(zeros((m, 1)))
+    for i in range(num_it):
+        best_stump, error, class_est = build_stump(data_arr, class_labels, D)   # build Stump
+        print("D:", D.T)
+        # calc alpha, throw in max(error,eps) to account for error=0
+        alpha = float(0.5*log((1.0-error)/max(error, 1e-16)))
+        best_stump['alpha'] = alpha
+        # store Stump Params in Array
+        weak_class_arr.append(best_stump)
+        print("classEst: ", class_est.T)
+        # exponent for D calc, getting messy
+        exponent = multiply(-1 * alpha * mat(class_labels).T, class_est)
+        # Calc New D for next iteration
+        D = multiply(D, exp(exponent))
         D = D/D.sum()
-        #calc training error of all classifiers, if this is 0 quit for loop early (use break)
-        aggClassEst += alpha*classEst
-        #print "aggClassEst: ",aggClassEst.T
-        aggErrors = multiply(sign(aggClassEst) != mat(classLabels).T,ones((m,1)))
-        errorRate = aggErrors.sum()/m
-        print "total error: ",errorRate
-        if errorRate == 0.0: break
-    return weakClassArr
+        # calc training error of all classifiers, if this is 0 quit for loop early (use break)
+        agg_class_est += alpha*class_est
+        print("aggClassEst: ", agg_class_est.T)
+        agg_errors = multiply(sign(agg_class_est) != mat(class_labels).T, ones((m, 1)))
+        error_rate = agg_errors.sum()/m
+        print("total error: ", error_rate)
+        if error_rate == 0.0:
+            break
+    return weak_class_arr
 
-def adaClassify(datToClass,classifierArr):
-    dataMatrix = mat(datToClass)#do stuff similar to last aggClassEst in adaBoostTrainDS
+
+def ada_classify(datToClass, classifierArr):
+    dataMatrix = mat(datToClass)    # do stuff similar to last aggClassEst in adaBoostTrainDS
     m = shape(dataMatrix)[0]
-    aggClassEst = mat(zeros((m,1)))
+    aggClassEst = mat(zeros((m, 1)))
     for i in range(len(classifierArr)):
-        classEst = stumpClassify(dataMatrix, classifierArr[i]['dim'],\
-                                 classifierArr[i]['thresh'],\
-                                 classifierArr[i]['ineq'])#call stump classify
+        # call stump classify
+        classEst = stump_classify(
+            dataMatrix, classifierArr[i]['dim'], classifierArr[i]['thresh'], classifierArr[i]['ineq'])
         aggClassEst += classifierArr[i]['alpha']*classEst
-        print aggClassEst
+        print(aggClassEst)
     return sign(aggClassEst)
 
-def plotROC(predStrengths, classLabels):
-    import matplotlib.pyplot as plt
-    cur = (1.0,1.0) #cursor
-    ySum = 0.0 #variable to calculate AUC
-    numPosClas = sum(array(classLabels)==1.0)
-    yStep = 1/float(numPosClas); xStep = 1/float(len(classLabels)-numPosClas)
-    sortedIndicies = predStrengths.argsort()#get sorted index, it's reverse
+
+def plot_roc(predStrengths, classLabels):
+    # cursor
+    cur = (1.0, 1.0)
+    # variable to calculate AUC
+    ySum = 0.0
+    numPosClass = sum(array(classLabels) == 1.0)
+    yStep = 1/float(numPosClass)
+    xStep = 1/float(len(classLabels)-numPosClass)
+    # get sorted index, it's reverse
+    sortedIndices = predStrengths.argsort()
     fig = plt.figure()
     fig.clf()
     ax = plt.subplot(111)
-    #loop through all the values, drawing a line segment at each point
-    for index in sortedIndicies.tolist()[0]:
+    # loop through all the values, drawing a line segment at each point
+    for index in sortedIndices.tolist()[0]:
         if classLabels[index] == 1.0:
-            delX = 0; delY = yStep;
+            delX = 0
+            delY = yStep
         else:
-            delX = xStep; delY = 0;
+            delX = xStep
+            delY = 0
             ySum += cur[1]
-        #draw line from cur to (cur[0]-delX,cur[1]-delY)
-        ax.plot([cur[0],cur[0]-delX],[cur[1],cur[1]-delY], c='b')
-        cur = (cur[0]-delX,cur[1]-delY)
-    ax.plot([0,1],[0,1],'b--')
-    plt.xlabel('False positive rate'); plt.ylabel('True positive rate')
+        # draw line from cur to (cur[0]-delX,cur[1]-delY)
+        ax.plot([cur[0], cur[0]-delX], [cur[1], cur[1]-delY], c='b')
+        cur = (cur[0]-delX, cur[1]-delY)
+    ax.plot([0, 1], [0, 1], 'b--')
+    plt.xlabel('False positive rate')
+    plt.ylabel('True positive rate')
     plt.title('ROC curve for AdaBoost horse colic detection system')
-    ax.axis([0,1,0,1])
+    ax.axis([0, 1, 0, 1])
     plt.show()
-    print "the Area Under the Curve is: ",ySum*xStep
+    print("the Area Under the Curve is: ", ySum*xStep)
+
+
+if __name__ == '__main__':
+    my_data_mat, my_class_labels = load_simple_data()
+    my_d = mat(ones((5, 1)) / 5)
+    # print(build_stump(my_data_mat, my_class_labels, my_d))
+    classifierArray = ada_boost_train_ds(my_data_mat, my_class_labels, 9)
+    print("classifierArray")
+    print(classifierArray)
+    print("Run adaboost finish")
