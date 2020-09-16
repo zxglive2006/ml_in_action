@@ -54,7 +54,8 @@ def build_stump(dataArr, class_labels, D):
     num_steps = 10.0
     best_stump = {}
     best_class_est = mat(zeros((m, 1)))
-    min_error = inf     # init error sum, to +infinity
+    # init error sum to +infinity
+    min_error = inf
     for i in range(n):  # loop over all dimensions
         range_min = data_matrix[:, i].min()
         range_max = data_matrix[:, i].max()
@@ -93,13 +94,13 @@ def ada_boost_train_ds(data_arr, class_labels, num_it=40):
     agg_class_est = mat(zeros((m, 1)))
     for i in range(num_it):
         best_stump, error, class_est = build_stump(data_arr, class_labels, D)   # build Stump
-        print("D:", D.T)
+        # print("D:", D.T)
         # calc alpha, throw in max(error,eps) to account for error=0
         alpha = float(0.5*log((1.0-error)/max(error, 1e-16)))
         best_stump['alpha'] = alpha
         # store Stump Params in Array
         weak_class_arr.append(best_stump)
-        print("classEst: ", class_est.T)
+        # print("class_est: ", class_est.T)
         # exponent for D calc, getting messy
         exponent = multiply(-1 * alpha * mat(class_labels).T, class_est)
         # Calc New D for next iteration
@@ -107,17 +108,18 @@ def ada_boost_train_ds(data_arr, class_labels, num_it=40):
         D = D/D.sum()
         # calc training error of all classifiers, if this is 0 quit for loop early (use break)
         agg_class_est += alpha*class_est
-        print("aggClassEst: ", agg_class_est.T)
+        # print("agg_class_est: ", agg_class_est.T)
         agg_errors = multiply(sign(agg_class_est) != mat(class_labels).T, ones((m, 1)))
         error_rate = agg_errors.sum()/m
-        print("total error: ", error_rate)
+        # print("total error: ", error_rate)
         if error_rate == 0.0:
             break
-    return weak_class_arr
+    return weak_class_arr, agg_class_est
 
 
 def ada_classify(datToClass, classifierArr):
-    dataMatrix = mat(datToClass)    # do stuff similar to last aggClassEst in adaBoostTrainDS
+    # do stuff similar to last aggClassEst in ada_boost_train_ds
+    dataMatrix = mat(datToClass)
     m = shape(dataMatrix)[0]
     aggClassEst = mat(zeros((m, 1)))
     for i in range(len(classifierArr)):
@@ -125,7 +127,7 @@ def ada_classify(datToClass, classifierArr):
         classEst = stump_classify(
             dataMatrix, classifierArr[i]['dim'], classifierArr[i]['thresh'], classifierArr[i]['ineq'])
         aggClassEst += classifierArr[i]['alpha']*classEst
-        print(aggClassEst)
+        # print(aggClassEst)
     return sign(aggClassEst)
 
 
@@ -163,11 +165,36 @@ def plot_roc(predStrengths, classLabels):
     print("the Area Under the Curve is: ", ySum*xStep)
 
 
-if __name__ == '__main__':
+def test_simple_data():
     my_data_mat, my_class_labels = load_simple_data()
+    print("my_class_labels")
+    print(my_class_labels)
     my_d = mat(ones((5, 1)) / 5)
     # print(build_stump(my_data_mat, my_class_labels, my_d))
     classifierArray = ada_boost_train_ds(my_data_mat, my_class_labels, 9)
     print("classifierArray")
     print(classifierArray)
+    print(ada_classify([0, 0], classifierArray))
+    print(ada_classify([[5, 5], [0, 0]], classifierArray))
+
+
+def test_horse_data():
+    datArr, labelArr = load_data_set("horseColicTraining2.txt")
+    testArr, testLabelArr = load_data_set("horseColicTest2.txt")
+    test_size = len(testLabelArr)
+    classifier_count = 50
+    classifierArray = ada_boost_train_ds(datArr, labelArr, classifier_count)
+    prediction10 = ada_classify(testArr, classifierArray)
+    errArr = mat(ones((test_size, 1)))
+    errCount = errArr[prediction10 != mat(testLabelArr).T].sum()
+    print("classifier count:{}, error count:{}, error rate:{:.2f}".format(
+        classifier_count, errCount, errCount/test_size))
+
+
+if __name__ == '__main__':
+    # test_simple_data()
+    # test_horse_data()
+    datArr, labelArr = load_data_set("horseColicTraining2.txt")
+    classifierArray, aggClassEst = ada_boost_train_ds(datArr, labelArr, 10)
+    plot_roc(aggClassEst.T, labelArr)
     print("Run adaboost finish")
