@@ -39,5 +39,6 @@ class MRmean(MRJob):
         return ([self.mr(mapper=self.map, mapper_final=self.map_final,\
                           reducer=self.reduce,)])
 
+
 if __name__ == '__main__':
     MRmean.run()
