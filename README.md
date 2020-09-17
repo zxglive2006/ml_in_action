@@ -5,6 +5,7 @@ Machine Learning in Action
 
 ### 需要安装的包：
 ##### pip install feedparser
+##### pip install mrjob
 
 #### https://github.com/votesmart/python-votesmart
 

@@ -1,13 +1,14 @@
-'''
+"""
 Created on Feb 27, 2011
 MapReduce version of Pegasos SVM
 Using mrjob to automate job flow
 @author: Peter
-'''
+"""
 from mrjob.job import MRJob
 
 import pickle
 from numpy import *
+
 
 class MRsvm(MRJob):
     DEFAULT_INPUT_PROTOCOL = 'json_value'
@@ -20,7 +21,8 @@ class MRsvm(MRJob):
         self.dataList = []
         self.k = self.options.batchsize
         self.numMappers = 1
-        self.t = 1  #iteration number
+        # iteration number
+        self.t = 1
                                                  
     def configure_options(self):
         super(MRsvm, self).configure_options()
@@ -31,9 +33,10 @@ class MRsvm(MRJob):
             '--batchsize', dest='batchsize', default=100, type='int',
             help='k: number of data points in a batch')
     
-    def map(self, mapperId, inVals): #needs exactly 2 arguments
-        #input: nodeId, ('w', w-vector) OR nodeId, ('x', int)
-        if False: yield
+    def map(self, mapperId, inVals): # needs exactly 2 arguments
+        # input: nodeId, ('w', w-vector) OR nodeId, ('x', int)
+        if False:
+            yield
         if inVals[0]=='w':                  #accumulate W-vector
             self.w = inVals[1]
         elif inVals[0]=='x':
@@ -73,6 +76,7 @@ class MRsvm(MRJob):
     def steps(self):
         return ([self.mr(mapper=self.map, reducer=self.reduce, 
                          mapper_final=self.map_fin)]*self.options.iterations)
+
 
 if __name__ == '__main__':
     MRsvm.run()

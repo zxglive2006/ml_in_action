@@ -1,9 +1,9 @@
-'''
+"""
 Created on Feb 28, 2011
-
 @author: Peter
-'''
+"""
 from mrjob.job import MRJob
+
 
 class MRmean(MRJob):
     def __init__(self, *args, **kwargs):
@@ -36,8 +36,7 @@ class MRmean(MRJob):
         yield (mean, var) #emit mean and var
         
     def steps(self):
-        return ([self.mr(mapper=self.map, mapper_final=self.map_final,\
-                          reducer=self.reduce,)])
+        return ([self.mr(mapper=self.map, mapper_final=self.map_final, reducer=self.reduce,)])
 
 
 if __name__ == '__main__':
