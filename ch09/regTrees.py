@@ -6,29 +6,35 @@ Tree-Based Regression Methods
 from numpy import *
 
 
-def load_data_set(fileName):      # general function to parse tab -delimited floats
+def load_data_set(fileName):
+    """
+    General function to parse tab -delimited floats
+    :param fileName:
+    :return:
+    """
     # assume last column is target value
     dataMat = []
     fr = open(fileName)
     for line in fr.readlines():
         curLine = line.strip().split('\t')
-        fltLine = map(float,curLine)    # map all elements to float()
+        # map all elements to float()
+        fltLine = list(map(float, curLine))
         dataMat.append(fltLine)
     return dataMat
 
 
-def binSplitDataSet(dataSet, feature, value):
-    mat0 = dataSet[nonzero(dataSet[:, feature] > value)[0], :][0]
-    mat1 = dataSet[nonzero(dataSet[:, feature] <= value)[0], :][0]
+def bin_split_data_set(dataSet, feature, value):
+    mat0 = dataSet[nonzero(dataSet[:, feature] > value)[0], :]
+    mat1 = dataSet[nonzero(dataSet[:, feature] <= value)[0], :]
     return mat0, mat1
 
 
-def regLeaf(dataSet):
+def reg_leaf(dataSet):
     # returns the value used for each leaf
     return mean(dataSet[:, -1])
 
 
-def regErr(dataSet):
+def reg_err(dataSet):
     return var(dataSet[:, -1]) * shape(dataSet)[0]
 
 
@@ -37,7 +43,7 @@ def linearSolve(dataSet):   # helper function used in two places
     # create a copy of data with 1 in 0th position
     X = mat(ones((m,n)))
     Y = mat(ones((m,1)))
-    X[:,1:n] = dataSet[:, 0:n-1]
+    X[:, 1:n] = dataSet[:, 0:n-1]
     Y = dataSet[:,-1]   # and strip out Y
     xTx = X.T*X
     if linalg.det(xTx) == 0.0:
@@ -49,7 +55,7 @@ def linearSolve(dataSet):   # helper function used in two places
 
 def modelLeaf(dataSet):
     # create linear model and return coeficients
-    ws,X,Y = linearSolve(dataSet)
+    ws, X, Y = linearSolve(dataSet)
     return ws
 
 
@@ -59,82 +65,90 @@ def modelErr(dataSet):
     return sum(power(Y - yHat,2))
 
 
-def chooseBestSplit(dataSet, leafType=regLeaf, errType=regErr, ops=(1,4)):
+def choose_best_split(dataSet, leafType=reg_leaf, errType=reg_err, ops=(1, 4)):
     tolS = ops[0]
     tolN = ops[1]
     # if all the target variables are the same value: quit and return value
-    if len(set(dataSet[:,-1].T.tolist()[0])) == 1:  # exit cond 1
+    if len(set(dataSet[:, -1].tolist())) == 1:  # exit cond 1
         return None, leafType(dataSet)
-    m,n = shape(dataSet)
+    m, n = shape(dataSet)
     # the choice of the best feature is driven by Reduction in RSS error from mean
     S = errType(dataSet)
-    bestS = inf; bestIndex = 0; bestValue = 0
+    bestS = inf
+    bestIndex = 0
+    bestValue = 0
     for featIndex in range(n-1):
-        for splitVal in set(dataSet[:,featIndex]):
-            mat0, mat1 = binSplitDataSet(dataSet, featIndex, splitVal)
-            if (shape(mat0)[0] < tolN) or (shape(mat1)[0] < tolN): continue
+        for splitVal in set(dataSet[:, featIndex]):
+            mat0, mat1 = bin_split_data_set(dataSet, featIndex, splitVal)
+            if shape(mat0)[0] < tolN or shape(mat1)[0] < tolN:
+                continue
             newS = errType(mat0) + errType(mat1)
             if newS < bestS: 
                 bestIndex = featIndex
                 bestValue = splitVal
                 bestS = newS
     # if the decrease (S-bestS) is less than a threshold don't do the split
-    if (S - bestS) < tolS: 
-        return None, leafType(dataSet) # exit cond 2
-    mat0, mat1 = binSplitDataSet(dataSet, bestIndex, bestValue)
-    if (shape(mat0)[0] < tolN) or (shape(mat1)[0] < tolN):  # exit cond 3
+    if S - bestS < tolS:
+        return None, leafType(dataSet)  # exit cond 2
+    mat0, mat1 = bin_split_data_set(dataSet, bestIndex, bestValue)
+    if shape(mat0)[0] < tolN or shape(mat1)[0] < tolN:  # exit cond 3
         return None, leafType(dataSet)
     # returns the best feature to split on and the value used for that split
-    return bestIndex,bestValue
+    return bestIndex, bestValue
 
 
-def createTree(dataSet, leafType=regLeaf, errType=regErr, ops=(1,4)):
+def create_tree(dataSet, leafType=reg_leaf, errType=reg_err, ops=(1, 4)):
     # assume dataSet is NumPy Mat so we can array filtering
-    feat, val = chooseBestSplit(dataSet, leafType, errType, ops)    # choose the best split
+    # choose the best split
+    feat, val = choose_best_split(dataSet, leafType, errType, ops)
+    # if the splitting hit a stop condition return val
     if feat is None:
-        return val     # if the splitting hit a stop condition return val
+        return val
     retTree = {'spInd': feat, 'spVal': val}
-    lSet, rSet = binSplitDataSet(dataSet, feat, val)
-    retTree['left'] = createTree(lSet, leafType, errType, ops)
-    retTree['right'] = createTree(rSet, leafType, errType, ops)
+    lSet, rSet = bin_split_data_set(dataSet, feat, val)
+    retTree['left'] = create_tree(lSet, leafType, errType, ops)
+    retTree['right'] = create_tree(rSet, leafType, errType, ops)
     return retTree  
 
 
-def isTree(obj):
+def is_tree(obj):
     return type(obj).__name__ == 'dict'
 
 
-def getMean(tree):
-    if isTree(tree['right']):
-        tree['right'] = getMean(tree['right'])
-    if isTree(tree['left']):
-        tree['left'] = getMean(tree['left'])
+def get_mean(tree):
+    if is_tree(tree['right']):
+        tree['right'] = get_mean(tree['right'])
+    if is_tree(tree['left']):
+        tree['left'] = get_mean(tree['left'])
     return (tree['left']+tree['right'])/2.0
 
 
 def prune(tree, testData):
     # if we have no test data collapse the tree
     if shape(testData)[0] == 0:
-        return getMean(tree)
+        return get_mean(tree)
     # if the branches are not trees try to prune them
-    if isTree(tree['right']) or isTree(tree['left']):
-        lSet, rSet = binSplitDataSet(testData, tree['spInd'], tree['spVal'])
-    if isTree(tree['left']):
+    if is_tree(tree['right']) or is_tree(tree['left']):
+        lSet, rSet = bin_split_data_set(testData, tree['spInd'], tree['spVal'])
+    if is_tree(tree['left']):
         tree['left'] = prune(tree['left'], lSet)
-    if isTree(tree['right']):
-        tree['right'] =  prune(tree['right'], rSet)
-    # if they are now both leafs, see if we can merge them
-    if not isTree(tree['left']) and not isTree(tree['right']):
-        lSet, rSet = binSplitDataSet(testData, tree['spInd'], tree['spVal'])
-        errorNoMerge = sum(power(lSet[:,-1] - tree['left'],2)) +\
-            sum(power(rSet[:,-1] - tree['right'],2))
+    if is_tree(tree['right']):
+        tree['right'] = prune(tree['right'], rSet)
+    # if they are now both leaves, see if we can merge them
+    if not is_tree(tree['left']) and not is_tree(tree['right']):
+        lSet, rSet = bin_split_data_set(testData, tree['spInd'], tree['spVal'])
+        errorLeft = sum(power(lSet[:, -1] - tree['left'], 2))
+        errorRight = sum(power(rSet[:, -1] - tree['right'], 2))
+        errorNoMerge = errorLeft + errorRight
         treeMean = (tree['left']+tree['right'])/2.0
-        errorMerge = sum(power(testData[:,-1] - treeMean,2))
+        errorMerge = sum(power(testData[:, -1] - treeMean, 2))
         if errorMerge < errorNoMerge: 
             print("merging")
             return treeMean
-        else: return tree
-    else: return tree
+        else:
+            return tree
+    else:
+        return tree
 
 
 def regTreeEval(model, inDat):
@@ -149,15 +163,15 @@ def modelTreeEval(model, inDat):
 
 
 def treeForeCast(tree, inData, modelEval=regTreeEval):
-    if not isTree(tree):
+    if not is_tree(tree):
         return modelEval(tree, inData)
     if inData[tree['spInd']] > tree['spVal']:
-        if isTree(tree['left']):
+        if is_tree(tree['left']):
             return treeForeCast(tree['left'], inData, modelEval)
         else:
             return modelEval(tree['left'], inData)
     else:
-        if isTree(tree['right']):
+        if is_tree(tree['right']):
             return treeForeCast(tree['right'], inData, modelEval)
         else:
             return modelEval(tree['right'], inData)
@@ -171,6 +185,36 @@ def createForeCast(tree, testData, modelEval=regTreeEval):
     return yHat
 
 
-if __name__ == '__main__':
+def hello_bin_split():
+    testMat = mat(eye(4))
+    print(testMat)
+    my_mat0, my_mat1 = bin_split_data_set(testMat, 1, 0.5)
+    print("mat0")
+    print(my_mat0)
+    print("mat1")
+    print(my_mat1)
 
+
+def hello_create_tree():
+    myDat = load_data_set("ex00.txt")
+    myMat = array(myDat)
+    print(create_tree(myMat))
+    myDat1 = load_data_set("ex0.txt")
+    myMat1 = array(myDat1)
+    print(create_tree(myMat1))
+    # print(create_tree(myMat1, ops=(0, 1)))
+    myDat2 = load_data_set("ex2.txt")
+    myMat2 = array(myDat2)
+    # print(create_tree(myMat2))
+    # print(create_tree(myMat2, ops=(10000, 4)))
+    myTree = create_tree(myMat2, ops=(0, 1))
+    print(myTree)
+    myDatTest = load_data_set("ex2test.txt")
+    myMat2Test = array(myDatTest)
+    print(prune(myTree, myMat2Test))
+
+
+if __name__ == '__main__':
+    # hello_bin_split()
+    hello_create_tree()
     print("Run regTress finish")
