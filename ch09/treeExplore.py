@@ -13,13 +13,13 @@ def reDraw(tolS,tolN):
     reDraw.a = reDraw.f.add_subplot(111)
     if chkBtnVar.get():
         if tolN < 2: tolN = 2
-        myTree=regTrees.create_tree(reDraw.rawDat, regTrees.modelLeaf, \
-                                    regTrees.modelErr, (tolS,tolN))
-        yHat = regTrees.createForeCast(myTree, reDraw.testDat, \
-                                       regTrees.modelTreeEval)
+        myTree=regTrees.create_tree(reDraw.rawDat, regTrees.model_leaf, \
+                                    regTrees.model_err, (tolS, tolN))
+        yHat = regTrees.create_fore_cast(myTree, reDraw.testDat, \
+                                         regTrees.model_tree_eval)
     else:
         myTree=regTrees.create_tree(reDraw.rawDat, ops=(tolS, tolN))
-        yHat = regTrees.createForeCast(myTree, reDraw.testDat)
+        yHat = regTrees.create_fore_cast(myTree, reDraw.testDat)
     reDraw.a.scatter(reDraw.rawDat[:,0], reDraw.rawDat[:,1], s=5) #use scatter for data set
     reDraw.a.plot(reDraw.testDat, yHat, linewidth=2.0) #use plot for yHat
     reDraw.canvas.show()

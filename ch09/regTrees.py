@@ -38,13 +38,14 @@ def reg_err(dataSet):
     return var(dataSet[:, -1]) * shape(dataSet)[0]
 
 
-def linearSolve(dataSet):   # helper function used in two places
+def linear_solve(dataSet):   # helper function used in two places
+    dataSet = mat(dataSet)
     m, n = shape(dataSet)
     # create a copy of data with 1 in 0th position
-    X = mat(ones((m,n)))
-    Y = mat(ones((m,1)))
+    X = mat(ones((m, n)))
+    Y = mat(ones((m, 1)))
     X[:, 1:n] = dataSet[:, 0:n-1]
-    Y = dataSet[:,-1]   # and strip out Y
+    Y = dataSet[:, -1]   # and strip out Y
     xTx = X.T*X
     if linalg.det(xTx) == 0.0:
         raise NameError('This matrix is singular, cannot do inverse,\n\
@@ -53,16 +54,16 @@ def linearSolve(dataSet):   # helper function used in two places
     return ws, X, Y
 
 
-def modelLeaf(dataSet):
-    # create linear model and return coeficients
-    ws, X, Y = linearSolve(dataSet)
+def model_leaf(dataSet):
+    # create linear model and return coefficient
+    ws, X, Y = linear_solve(dataSet)
     return ws
 
 
-def modelErr(dataSet):
-    ws, X, Y = linearSolve(dataSet)
+def model_err(dataSet):
+    ws, X, Y = linear_solve(dataSet)
     yHat = X * ws
-    return sum(power(Y - yHat,2))
+    return sum(power(Y - yHat, 2))
 
 
 def choose_best_split(dataSet, leafType=reg_leaf, errType=reg_err, ops=(1, 4)):
@@ -140,7 +141,7 @@ def prune(tree, testData):
         errorLeft = sum(power(lSet[:, -1] - tree['left'], 2))
         errorRight = sum(power(rSet[:, -1] - tree['right'], 2))
         errorNoMerge = errorLeft + errorRight
-        treeMean = (tree['left']+tree['right'])/2.0
+        treeMean = (tree['left'] + tree['right'])/2.0
         errorMerge = sum(power(testData[:, -1] - treeMean, 2))
         if errorMerge < errorNoMerge: 
             print("merging")
@@ -151,37 +152,37 @@ def prune(tree, testData):
         return tree
 
 
-def regTreeEval(model, inDat):
+def reg_tree_eval(model, inDat):
     return float(model)
 
 
-def modelTreeEval(model, inDat):
+def model_tree_eval(model, inDat):
     n = shape(inDat)[1]
     X = mat(ones((1,n+1)))
     X[:, 1:n+1]=inDat
     return float(X*model)
 
 
-def treeForeCast(tree, inData, modelEval=regTreeEval):
+def tree_fore_cast(tree, inData, modelEval=reg_tree_eval):
     if not is_tree(tree):
         return modelEval(tree, inData)
     if inData[tree['spInd']] > tree['spVal']:
         if is_tree(tree['left']):
-            return treeForeCast(tree['left'], inData, modelEval)
+            return tree_fore_cast(tree['left'], inData, modelEval)
         else:
             return modelEval(tree['left'], inData)
     else:
         if is_tree(tree['right']):
-            return treeForeCast(tree['right'], inData, modelEval)
+            return tree_fore_cast(tree['right'], inData, modelEval)
         else:
             return modelEval(tree['right'], inData)
 
 
-def createForeCast(tree, testData, modelEval=regTreeEval):
+def create_fore_cast(tree, testData, modelEval=reg_tree_eval):
     m = len(testData)
     yHat = mat(zeros((m, 1)))
     for i in range(m):
-        yHat[i, 0] = treeForeCast(tree, mat(testData[i]), modelEval)
+        yHat[i, 0] = tree_fore_cast(tree, mat(testData[i]), modelEval)
     return yHat
 
 
@@ -212,9 +213,28 @@ def hello_create_tree():
     myDatTest = load_data_set("ex2test.txt")
     myMat2Test = array(myDatTest)
     print(prune(myTree, myMat2Test))
+    myHat2 = array(load_data_set("exp2.txt"))
+    print(create_tree(myHat2, model_leaf, model_err, (1, 10)))
+
+
+def hello_tree_fore_cast():
+    trainMat = array(load_data_set("bikeSpeedVsIq_train.txt"))
+    testMat = array(load_data_set("bikeSpeedVsIq_test.txt"))
+    myTree = create_tree(trainMat, ops=(1, 20))
+    yHat = create_fore_cast(myTree, testMat[:, 0])
+    print(corrcoef(yHat, testMat[:, 1], rowvar=False)[0, 1])
+    myTree = create_tree(trainMat, model_leaf, model_err, ops=(1, 20))
+    yHat = create_fore_cast(myTree, testMat[:, 0], model_tree_eval)
+    print(corrcoef(yHat, testMat[:, 1], rowvar=False)[0, 1])
+    ws, X, Y = linear_solve(trainMat)
+    print(ws)
+    for i in range(shape(testMat)[0]):
+        yHat[i] = testMat[i, 0] * ws[1, 0] + ws[0, 0]
+    print(corrcoef(yHat, testMat[:, 1], rowvar=False)[0, 1])
 
 
 if __name__ == '__main__':
     # hello_bin_split()
-    hello_create_tree()
+    # hello_create_tree()
+    hello_tree_fore_cast()
     print("Run regTress finish")
