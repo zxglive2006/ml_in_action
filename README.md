@@ -6,12 +6,14 @@ Machine Learning in Action
 ### 需要安装的包：
 ##### pip install feedparser
 ##### pip install mrjob
+##### pip install python-twitter
 
 #### https://github.com/votesmart/python-votesmart
 
 This is the source code to go with "Machine Learning in Action" 
 by Peter Harrington published by Manning Inc.
-The official page for this book can be found here: http://manning.com/pharrington/
+The official page for this book can be found here: 
+https://www.manning.com/books/machine-learning-in-action
 
 All the code examples were working on Python 2.6, there shouldn't be any problems with the 2.7.  
 NumPy will be needed for most examples.  If you have trouble running any of the examples us know 
