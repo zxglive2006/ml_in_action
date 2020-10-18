@@ -8,7 +8,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pca
 
-dataMat = pca.replaceNanWithMean()
+dataMat = pca.replace_nan_with_mean()
 
 #below is a quick hack copied from pca.pca()
 meanVals = mean(dataMat, axis=0)

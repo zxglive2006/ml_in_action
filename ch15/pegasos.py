@@ -13,7 +13,7 @@ def loadDataSet(fileName):
     fr = open(fileName)
     for line in fr.readlines():
         lineArr = line.strip().split('\t')
-        # dataMat.append([float(lineArr[0]), float(lineArr[1]), float(lineArr[2])])
+        # data_mat.append([float(lineArr[0]), float(lineArr[1]), float(lineArr[2])])
         dataMat.append([float(lineArr[0]), float(lineArr[1])])
         labelMat.append(float(lineArr[2]))
     return dataMat, labelMat
