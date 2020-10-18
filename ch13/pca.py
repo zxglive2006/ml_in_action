@@ -55,7 +55,7 @@ def hello_secom():
     meanVals = mean(dataMat, axis=0)
     meanRemoved = dataMat - meanVals
     covMat = cov(meanRemoved, rowvar=False)
-    eigVals, eigVects = linalg.eig(mat(covMat))
+    eigVals, eig_vectors = linalg.eig(mat(covMat))
     print(eigVals)
 
 
