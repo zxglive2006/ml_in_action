@@ -145,6 +145,19 @@ def hello_svd():
     print(U[:, :3] * Sig3 * VT[:3, :])
 
 
+def hello_sim():
+    myMat = mat(load_ex_data())
+    print("euclid_sim")
+    print(euclid_sim(myMat[:, 0], myMat[:, 4]))
+    print(euclid_sim(myMat[:, 0], myMat[:, 0]))
+    print("cos_sim")
+    print(cos_sim(myMat[:, 0], myMat[:, 4]))
+    print(cos_sim(myMat[:, 0], myMat[:, 0]))
+    print("pears_sim")
+    print(pears_sim(myMat[:, 0], myMat[:, 4]))
+
+
 if __name__ == '__main__':
-    hello_svd()
+    # hello_svd()
+    hello_sim()
     print("Run svd finish")
