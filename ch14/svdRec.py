@@ -6,7 +6,7 @@ from numpy import *
 from numpy import linalg as la
 
 
-def loadExData():
+def load_ex_data():
     return[[0, 0, 0, 2, 2],
            [0, 0, 0, 3, 3],
            [0, 0, 0, 1, 1],
@@ -16,7 +16,7 @@ def loadExData():
            [1, 1, 1, 0, 0]]
 
 
-def loadExData2():
+def load_ex_data2():
     return[[0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 5],
            [0, 0, 0, 3, 0, 4, 0, 0, 0, 0, 3],
            [0, 0, 0, 0, 4, 0, 0, 1, 0, 4, 0],
@@ -30,33 +30,35 @@ def loadExData2():
            [1, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0]]
 
 
-def ecludSim(inA, inB):
+def euclid_sim(inA, inB):
     return 1.0/(1.0 + la.norm(inA - inB))
 
 
-def pearsSim(inA, inB):
-    if len(inA) < 3 : return 1.0
-    return 0.5+0.5*corrcoef(inA, inB, rowvar = 0)[0][1]
+def pears_sim(inA, inB):
+    if len(inA) < 3:
+        return 1.0
+    return 0.5 + 0.5 * corrcoef(inA, inB, rowvar=False)[0][1]
 
 
-def cosSim(inA, inB):
+def cos_sim(inA, inB):
     num = float(inA.T*inB)
     denom = la.norm(inA)*la.norm(inB)
     return 0.5+0.5*(num/denom)
 
 
-def standEst(dataMat, user, simMeas, item):
+def stand_est(dataMat, user, simMeas, item):
     n = shape(dataMat)[1]
-    simTotal = 0.0; ratSimTotal = 0.0
+    simTotal = 0.0
+    ratSimTotal = 0.0
     for j in range(n):
-        userRating = dataMat[user,j]
+        userRating = dataMat[user, j]
         if userRating == 0:
             continue
-        overLap = nonzero(logical_and(dataMat[:,item].A>0, dataMat[:,j].A>0))[0]
+        overLap = nonzero(logical_and(dataMat[:, item].A > 0, dataMat[:, j].A > 0))[0]
         if len(overLap) == 0:
             similarity = 0
         else:
-            similarity = simMeas(dataMat[overLap,item], dataMat[overLap,j])
+            similarity = simMeas(dataMat[overLap, item], dataMat[overLap, j])
         print('the %d and %d similarity is: %f' % (item, j, similarity))
         simTotal += similarity
         ratSimTotal += similarity * userRating
@@ -66,18 +68,20 @@ def standEst(dataMat, user, simMeas, item):
         return ratSimTotal/simTotal
 
 
-def svdEst(dataMat, user, simMeas, item):
+def svd_est(dataMat, user, simMeas, item):
     n = shape(dataMat)[1]
-    simTotal = 0.0; ratSimTotal = 0.0
-    U,Sigma,VT = la.svd(dataMat)
+    simTotal = 0.0
+    ratSimTotal = 0.0
+    U, Sigma, VT = la.svd(dataMat)
     # arrange Sig4 into a diagonal matrix
-    Sig4 = mat(eye(4)*Sigma[:4])
+    Sig4 = mat(eye(4) * Sigma[:4])
     # create transformed items
-    xformedItems = dataMat.T * U[:, :4] * Sig4.I
+    x_formed_items = dataMat.T * U[:, :4] * Sig4.I
     for j in range(n):
-        userRating = dataMat[user,j]
-        if userRating == 0 or j==item: continue
-        similarity = simMeas(xformedItems[item,:].T, xformedItems[j,:].T)
+        userRating = dataMat[user, j]
+        if userRating == 0 or j == item:
+            continue
+        similarity = simMeas(x_formed_items[item, :].T, x_formed_items[j, :].T)
         print('the %d and %d similarity is: %f' % (item, j, similarity))
         simTotal += similarity
         ratSimTotal += similarity * userRating
@@ -87,10 +91,11 @@ def svdEst(dataMat, user, simMeas, item):
         return ratSimTotal/simTotal
 
 
-def recommend(dataMat, user, N=3, simMeas=cosSim, estMethod=standEst):
+def recommend(dataMat, user, N=3, simMeas=cos_sim, estMethod=stand_est):
     # find unrated items
-    unratedItems = nonzero(dataMat[user,:].A==0)[1]
-    if len(unratedItems) == 0: return 'you rated everything'
+    unratedItems = nonzero(dataMat[user, :].A == 0)[1]
+    if len(unratedItems) == 0:
+        return 'you rated everything'
     itemScores = []
     for item in unratedItems:
         estimatedScore = estMethod(dataMat, user, simMeas, item)
@@ -98,17 +103,17 @@ def recommend(dataMat, user, N=3, simMeas=cosSim, estMethod=standEst):
     return sorted(itemScores, key=lambda jj: jj[1], reverse=True)[:N]
 
 
-def printMat(inMat, thresh=0.8):
+def print_mat(inMat, thresh=0.8):
     for i in range(32):
         for k in range(32):
-            if float(inMat[i,k]) > thresh:
+            if float(inMat[i, k]) > thresh:
                 print(1,)
             else:
                 print(0,)
         print('')
 
 
-def imgCompress(numSV=3, thresh=0.8):
+def img_compress(numSV=3, thresh=0.8):
     myl = []
     for line in open('0_5.txt').readlines():
         newRow = []
@@ -117,16 +122,29 @@ def imgCompress(numSV=3, thresh=0.8):
         myl.append(newRow)
     myMat = mat(myl)
     print("****original matrix******")
-    printMat(myMat, thresh)
-    U,Sigma,VT = la.svd(myMat)
+    print_mat(myMat, thresh)
+    U, Sigma, VT = la.svd(myMat)
     SigRecon = mat(zeros((numSV, numSV)))
     # construct diagonal matrix from vector
     for k in range(numSV):
-        SigRecon[k,k] = Sigma[k]
-    reconMat = U[:,:numSV]*SigRecon*VT[:numSV,:]
+        SigRecon[k, k] = Sigma[k]
+    reconMat = U[:, :numSV] * SigRecon*VT[:numSV, :]
     print("****reconstructed matrix using %d singular values******" % numSV)
-    printMat(reconMat, thresh)
+    print_mat(reconMat, thresh)
+
+
+def hello_svd():
+    U, Sigma, VT = la.svd([[1, 1], [7, 7]])
+    print(U)
+    print(Sigma)
+    print(VT)
+    Data = load_ex_data()
+    U, Sigma, VT = la.svd(Data)
+    print(Sigma)
+    Sig3 = mat([[Sigma[0], 0, 0], [0, Sigma[1], 0], [0, 0, Sigma[2]]])
+    print(U[:, :3] * Sig3 * VT[:3, :])
 
 
 if __name__ == '__main__':
+    hello_svd()
     print("Run svd finish")
