@@ -107,9 +107,9 @@ def print_mat(inMat, thresh=0.8):
     for i in range(32):
         for k in range(32):
             if float(inMat[i, k]) > thresh:
-                print(1,)
+                print(1, end='')
             else:
-                print(0,)
+                print(0, end='')
         print('')
 
 
@@ -128,7 +128,7 @@ def img_compress(numSV=3, thresh=0.8):
     # construct diagonal matrix from vector
     for k in range(numSV):
         SigRecon[k, k] = Sigma[k]
-    reconMat = U[:, :numSV] * SigRecon*VT[:numSV, :]
+    reconMat = U[:, :numSV] * SigRecon * VT[:numSV, :]
     print("****reconstructed matrix using %d singular values******" % numSV)
     print_mat(reconMat, thresh)
 
@@ -157,7 +157,26 @@ def hello_sim():
     print(pears_sim(myMat[:, 0], myMat[:, 4]))
 
 
+def hello_recommend():
+    myMat = mat(load_ex_data())
+    myMat[0, 1] = myMat[0, 0] = myMat[1, 0] = myMat[2, 0] = 4
+    myMat[3, 3] = 2
+    print("myMat")
+    print(myMat)
+    print("recommend")
+    print(recommend(myMat, 2))
+    print(recommend(myMat, 2, simMeas=euclid_sim))
+    print(recommend(myMat, 2, simMeas=pears_sim))
+    U, Sigma, VT = la.svd(mat(load_ex_data2()))
+    print("Sigma")
+    print(Sigma)
+    print(recommend(myMat, 1, estMethod=svd_est))
+    print(recommend(myMat, 1, estMethod=svd_est, simMeas=pears_sim))
+
+
 if __name__ == '__main__':
     # hello_svd()
-    hello_sim()
+    # hello_sim()
+    # hello_recommend()
+    img_compress(2)
     print("Run svd finish")
